@@ -10,7 +10,7 @@ When you export photos from Google Photos, Live Photos get split into separate i
 1. Open Google Photos app on your phone
 2. Select a whole month of photos 
 3. Share → Save to Device
-4. **This tool is for people who've lost access to their Google Photos account**
+4. **This tool is mainly for people who've lost access to their photos on Google Photos, such as when you're forced to storage downgrade**
 
 ## 💖 Support This Project
 
@@ -26,16 +26,12 @@ If this tool helps you organize your Google Photos, please consider supporting i
 
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
-[![Total Downloads](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/total.svg?style=flat-square&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases)
-[![Latest Downloads](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/total.svg?style=flat-square&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
 
-<!-- Latest per-OS downloads -->
-[![Windows CLI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-Windows.exe.svg?style=flat-square&label=Windows%20CLI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
-[![macOS CLI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-macOS.svg?style=flat-square&label=macOS%20CLI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
-[![Linux CLI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-Linux.svg?style=flat-square&label=Linux%20CLI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
 
+<!-- Latest GUI downloads per OS -->
 [![Windows GUI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-gui-Windows.exe.svg?style=flat-square&label=Windows%20GUI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
 [![macOS GUI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-gui-macOS.svg?style=flat-square&label=macOS%20GUI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
+[![Linux GUI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-gui-Linux.svg?style=flat-square&label=Linux%20GUI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
 
 
 
@@ -60,11 +56,23 @@ The tool:
 
 ## 🚀 **Easy Download & Run (Recommended)**
 
-**Simple setup:**
+You do NOT need Python for the recommended method. Just download the standalone GUI for your OS from the **Releases** page and run it.
 
-1. **Install Python** from [python.org](https://python.org) (if you don't have it)
-2. **Download this repository** (green "Code" button → Download ZIP)
-3. **Run the tool:**
+- Windows: Download `google-takeout-helper-gui-Windows.exe` and double‑click to run.
+  - If SmartScreen appears: More info → Run anyway.
+- macOS: Download `google-takeout-helper-gui-macOS`.
+  - First run: right‑click → Open (to bypass Gatekeeper on unsigned apps).
+- Linux: Download `google-takeout-helper-gui-Linux`.
+  - Make it executable, then run:
+    ```bash
+    chmod +x google-takeout-helper-gui-Linux
+    ./google-takeout-helper-gui-Linux
+    ```
+
+Alternatively, you can run from source with Python:
+1. Install Python 3.8+ from [python.org](https://python.org)
+2. Clone or download this repository
+3. Run the GUI:
    ```bash
    python google_takeout_live_photos_helper.py --gui
    ```
@@ -97,7 +105,7 @@ Takeout/                          # ← Your main folder
 
 ## 🖥️ Using the GUI (Easiest)
 
-1. **Launch the app** (download from releases or run `python google_takeout_live_photos_helper.py --gui`)
+1. **Launch the app** (downloaded from Releases). Or run from source: `python google_takeout_live_photos_helper.py --gui`
 2. **Toggle dark mode** if the interface is too bright (🌙 Dark Mode button)
 3. **Select your Takeout folder** - click "Browse Takeout Folder"
 4. **Choose output location** - click "Browse Output Folder" 

@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build binaries (${{ matrix.os }})
+    name: Build GUI binaries (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -18,7 +18,7 @@ jobs:
         include:
           - os: ubuntu-latest
             py: '3.11'
-            gui: false
+            gui: true
           - os: macos-latest
             py: '3.11'
             gui: true
@@ -42,17 +42,16 @@ jobs:
         run: |
           python -m pip install pyinstaller
 
+      - name: Install Tk dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk
+
       - name: Show Python version
         run: python -V
 
-      - name: Build CLI executable
-        run: |
-          pyinstaller --onefile --paths src --name google-takeout-helper google_takeout_live_photos_helper.py
-        shell: bash
-        working-directory: .
-
-      - name: Build GUI executable (if applicable)
-        if: matrix.gui == true
+      - name: Build GUI executable
         run: |
           pyinstaller --onefile --paths src --windowed --name google-takeout-helper-gui scripts/launch_gui.py
         shell: bash
@@ -63,19 +62,10 @@ jobs:
           set -e
           OS_NAME=${{ runner.os }}
           mkdir -p dist/upload
-          # CLI
           if [ "$OS_NAME" = "Windows" ]; then
-            mv dist/google-takeout-helper.exe dist/upload/google-takeout-helper-${{ runner.os }}.exe
+            mv dist/google-takeout-helper-gui.exe dist/upload/google-takeout-helper-gui-${{ runner.os }}.exe
           else
-            mv dist/google-takeout-helper dist/upload/google-takeout-helper-${{ runner.os }}
-          fi
-          # GUI
-          if [ "${{ matrix.gui }}" = "true" ]; then
-            if [ "$OS_NAME" = "Windows" ]; then
-              mv dist/google-takeout-helper-gui.exe dist/upload/google-takeout-helper-gui-${{ runner.os }}.exe
-            else
-              mv dist/google-takeout-helper-gui dist/upload/google-takeout-helper-gui-${{ runner.os }}
-            fi
+            mv dist/google-takeout-helper-gui dist/upload/google-takeout-helper-gui-${{ runner.os }}
           fi
         shell: bash
 
