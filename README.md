@@ -26,18 +26,18 @@ If this tool helps you organize your Google Photos, please consider supporting i
 
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-[![Total Downloads](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/total?style=for-the-badge)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases)
-[![Latest Downloads](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/total?style=for-the-badge)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
+[![Total Downloads](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/total.svg?style=for-the-badge&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases)
+[![Latest Downloads](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/total.svg?style=for-the-badge&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
 
 <!-- Latest per-OS downloads -->
-[![Windows CLI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-Windows.exe?style=for-the-badge&label=Windows%20CLI)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
-[![macOS CLI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-macOS?style=for-the-badge&label=macOS%20CLI)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
-[![Linux CLI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-Linux?style=for-the-badge&label=Linux%20CLI)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
+[![Windows CLI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-Windows.exe.svg?style=for-the-badge&label=Windows%20CLI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
+[![macOS CLI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-macOS.svg?style=for-the-badge&label=macOS%20CLI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
+[![Linux CLI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-Linux.svg?style=for-the-badge&label=Linux%20CLI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
 
-[![Windows GUI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-gui-Windows.exe?style=for-the-badge&label=Windows%20GUI)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
-[![macOS GUI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-gui-macOS?style=for-the-badge&label=macOS%20GUI)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
+[![Windows GUI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-gui-Windows.exe.svg?style=for-the-badge&label=Windows%20GUI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
+[![macOS GUI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-gui-macOS.svg?style=for-the-badge&label=macOS%20GUI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
 
-*This project was developed with the assistance of AI to create a professional, user-friendly tool for the community.*
+
 
 ## 🔒 **Privacy & Security**
 

@@ -58,7 +58,6 @@ def main():
                 "Transform messy Google Takeout exports into\n"
                 "organized Live Photos and sorted media files.\n\n"
                 "Free and open source software.\n"
-                "Developed with AI assistance."
             )
         
         help_menu.add_command(label="About", command=show_about)
