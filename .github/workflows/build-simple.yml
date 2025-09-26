@@ -51,11 +51,20 @@ jobs:
       run: |
         mv dist/GoogleTakeoutHelper GoogleTakeoutHelper-linux
     
-    - name: Upload to Release
+    - name: Upload Windows executable
+      if: matrix.os == 'windows-latest' && github.event_name == 'release'
       uses: softprops/action-gh-release@v2
-      if: github.event_name == 'release'
       with:
-        files: |
-          GoogleTakeoutHelper.exe
-          GoogleTakeoutHelper-macOS.zip
-          GoogleTakeoutHelper-linux
+        files: GoogleTakeoutHelper.exe
+    
+    - name: Upload macOS executable
+      if: matrix.os == 'macos-latest' && github.event_name == 'release'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: GoogleTakeoutHelper-macOS.zip
+    
+    - name: Upload Linux executable
+      if: matrix.os == 'ubuntu-latest' && github.event_name == 'release'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: GoogleTakeoutHelper-linux
