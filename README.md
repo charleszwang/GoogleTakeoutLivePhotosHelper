@@ -24,10 +24,8 @@ If this tool helps you organize your Google Photos, please consider supporting i
 
 ---
 
-![Coverage](https://img.shields.io/badge/coverage-44%25-yellow)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 *This project was developed with the assistance of AI to create a professional, user-friendly tool for the community.*
 
