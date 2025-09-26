@@ -7,8 +7,8 @@ and separating standalone media files into organized directories.
 
 from ._version import __version__, __version_info__, DISPLAY_VERSION
 
-__author__ = "Your Name"
-__email__ = "your.email@example.com"
+__author__ = "Charles Wang"
+__email__ = "charleswangmain@gmail.com"
 __description__ = "Transform messy Google Takeout exports into organized Live Photos and sorted media files"
 
 from .processor import GoogleTakeoutProcessor

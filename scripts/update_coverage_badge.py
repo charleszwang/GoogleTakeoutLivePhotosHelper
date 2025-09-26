@@ -50,7 +50,7 @@ def update_readme_coverage(coverage_pct):
             content = f.read()
         
         # Update coverage badge
-        old_badge = r'!\[Coverage\]\(https://img\.shields\.io/codecov/c/github/yourusername/google-takeout-live-photos-helper\)'
+        old_badge = r'!\[Coverage\]\(https://img\.shields\.io/codecov/c/github/charleszwang/google-takeout-live-photos-helper\)'
         new_badge = f'![Coverage](https://img.shields.io/badge/coverage-{coverage_pct:.0f}%25-brightgreen)'
         
         content = re.sub(old_badge, new_badge, content)

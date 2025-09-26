@@ -500,7 +500,7 @@ class GoogleTakeoutProcessor:
                 print(f"\n💖 SUCCESS! Organized {total_pairs} Live Photos!")
                 print(f"   If this tool saved you time, please consider supporting it:")
                 print(f"   🎁 Donate: https://www.paypal.com/donate/?hosted_button_id=FPEZJUYKMH7M6")
-                print(f"   ⭐ Star: https://github.com/yourusername/google-takeout-live-photos-helper")
+                print(f"   ⭐ Star: https://github.com/charleszwang/google-takeout-live-photos-helper")
             
         print("="*50)
 

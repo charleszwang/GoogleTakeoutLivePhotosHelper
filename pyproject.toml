@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "google-takeout-live-photos-helper"
 dynamic = ["version"]
 authors = [
-    {name = "Your Name", email = "your.email@example.com"},
+    {name = "Charles Wang", email = "charleswangmain@gmail.com"},
 ]
 description = "Transform messy Google Takeout exports into organized Live Photos and sorted media files with an intuitive GUI"
 readme = "README.md"
@@ -39,9 +39,9 @@ dev = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/google-takeout-live-photos-helper"
-"Bug Reports" = "https://github.com/yourusername/google-takeout-live-photos-helper/issues"
-"Source" = "https://github.com/yourusername/google-takeout-live-photos-helper"
+"Homepage" = "https://github.com/charleszwang/google-takeout-live-photos-helper"
+"Bug Reports" = "https://github.com/charleszwang/google-takeout-live-photos-helper/issues"
+"Source" = "https://github.com/charleszwang/google-takeout-live-photos-helper"
 
 [project.scripts]
 google-takeout-helper = "google_takeout_live_photos.cli:main"
