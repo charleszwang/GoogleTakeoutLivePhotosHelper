@@ -16,11 +16,18 @@ When you export photos from Google Photos, Live Photos get split into separate i
 
 If this tool helps you organize your Google Photos, please consider supporting its development:
 
-[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal&style=for-the-badge&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=FPEZJUYKMH7M6)
+<a href="https://www.paypal.com/donate/?hosted_button_id=FPEZJUYKMH7M6" target="_blank">
+  <img src="https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal&style=for-the-badge&logoColor=white" alt="Donate with PayPal">
+</a>
 
 ⭐ **Also consider starring this repository** to help others discover it!
 
 ---
+
+![Build Status](https://github.com/yourusername/google-takeout-live-photos-helper/workflows/CI/badge.svg)
+![Coverage](https://img.shields.io/codecov/c/github/yourusername/google-takeout-live-photos-helper)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 *This project was developed with the assistance of AI to create a professional, user-friendly tool for the community.*
 
@@ -155,7 +162,7 @@ ls ~/Desktop/OrganizedPhotos/OtherMedia/     # Other photos/videos
 
 ## 🔧 For Developers
 
-Want to contribute or modify the code? See the [Developer Guide](docs/DEVELOPER_GUIDE.md) for:
+Want to contribute or modify the code? See the [Developer Guide](DEVELOPER_GUIDE.md) for:
 - Development setup and testing
 - Code quality tools and standards  
 - Architecture overview and design patterns
@@ -163,7 +170,7 @@ Want to contribute or modify the code? See the [Developer Guide](docs/DEVELOPER_
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📝 License
 

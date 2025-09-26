@@ -26,10 +26,27 @@ install-dev:
 
 # Testing
 test:
-	PYTHONPATH=src pytest tests/ -v --cov=google_takeout_live_photos --cov-report=term-missing --cov-report=html
+	PYTHONPATH=src pytest tests/ -v --cov=google_takeout_live_photos --cov-report=term-missing --cov-report=html --cov-report=xml --html=htmlcov/report.html
 
 test-quick:
-	pytest tests/ -x -v
+	PYTHONPATH=src pytest tests/ -x -v
+
+# Coverage only
+coverage:
+	PYTHONPATH=src coverage run -m pytest tests/
+	coverage report --show-missing
+	coverage html
+	@echo "📊 Coverage report generated in htmlcov/index.html"
+
+# Coverage with badge generation
+coverage-badge:
+	PYTHONPATH=src coverage run -m pytest tests/
+	coverage report --show-missing
+	coverage html
+	coverage xml
+	@echo "📊 Coverage reports generated:"
+	@echo "   HTML: htmlcov/index.html"
+	@echo "   XML: coverage.xml"
 
 # Code formatting
 format:

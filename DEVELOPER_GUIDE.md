@@ -2,6 +2,14 @@
 
 This guide is for developers who want to contribute to or build upon the Google Takeout Live Photos Helper.
 
+## 📊 Project Status
+
+![Build Status](https://github.com/yourusername/google-takeout-live-photos-helper/workflows/CI/badge.svg)
+![Coverage](https://img.shields.io/codecov/c/github/yourusername/google-takeout-live-photos-helper)
+![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)
+
 ## 🏗️ Project Structure
 
 This project follows Python best practices with a clean, modular structure:
@@ -81,15 +89,54 @@ pre-commit run --all-files
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all tests with coverage
 make test
 
-# Run with coverage
-PYTHONPATH=src pytest tests/ --cov=google_takeout_live_photos --cov-report=html
+# Quick test run
+make test-quick
 
-# Run specific test
+# Generate coverage report only
+make coverage
+
+# Generate coverage with badge
+make coverage-badge
+
+# Manual testing commands
+PYTHONPATH=src pytest tests/ --cov=google_takeout_live_photos --cov-report=html
 PYTHONPATH=src pytest tests/test_processor.py -v
 ```
+
+### 📊 Code Coverage
+
+The project maintains high code coverage standards:
+
+- **Target**: 90%+ coverage
+- **Current**: ![Coverage](https://img.shields.io/codecov/c/github/yourusername/google-takeout-live-photos-helper)
+- **Reports**: Generated in `htmlcov/` directory
+- **CI Integration**: Automatic coverage reporting on every commit
+
+#### Coverage Reports
+
+After running tests, you can view detailed coverage reports:
+
+```bash
+# Generate coverage report
+make coverage
+
+# Open HTML report in browser
+open htmlcov/index.html  # macOS
+xdg-open htmlcov/index.html  # Linux
+start htmlcov/index.html  # Windows
+```
+
+#### Coverage Requirements
+
+- **New code**: Must have 95%+ coverage
+- **Overall project**: Maintain 90%+ coverage
+- **Critical paths**: 100% coverage required for:
+  - File processing logic
+  - Data validation
+  - Error handling paths
 
 ## 🏗️ Architecture
 
