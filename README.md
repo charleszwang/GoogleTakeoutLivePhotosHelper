@@ -133,6 +133,30 @@ If you prefer using the command line, here's a complete example:
 # │   └── Photos from 2022/
 ```
 
+## 📲 What to do with the output files
+
+You’ll get two files per Live Photo pair:
+- Still photo: `.HEIC` or `.JPG`
+- Motion clip: `.MOV`
+
+Use them like this:
+
+### 🍎 Apple Photos / iCloud (recommended)
+- macOS: Photos → File → Import… → select everything in `LivePhotos/` (drag‑and‑drop works too).
+- For big libraries: turn on iCloud Photos on both Mac and iPhone, import on Mac, let it sync to your phone. Faster and more reliable than AirDrop.
+
+### 🔁 Back to Google Photos
+- First get the pairs into the iPhone Photos app (see above), then open Google Photos on iPhone and enable Backup & sync.
+- Keep the app open on Wi‑Fi and power until it says “Backup complete”.
+- Desktop uploads of random HEIC+MOV pairs don’t always recreate Live Photos correctly.
+
+### (Optional) Make pairs import better into Apple Photos
+If Apple Photos isn’t recognizing some pairs as Live Photos, enable:
+- CLI: add `--prepare-apple` (runs after processing)
+- GUI: check “Prepare for Apple Photos import (adds identifiers)”
+
+This writes a matching identifier to each photo/video pair using a bundled ExifTool so Photos can link them reliably. Safe, non-destructive, and skippable.
+
 ### Step 2: Run the Tool
 ```bash
 # Simple mode (recommended) - always try dry run first!

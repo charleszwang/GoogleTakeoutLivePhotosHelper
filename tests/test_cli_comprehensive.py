@@ -59,6 +59,7 @@ class TestCLIArgumentParsing(unittest.TestCase):
             mock_args.live_max_seconds = 6.0
             mock_args.dedupe_leftovers = False
             mock_args.show_issues = False
+            mock_args.prepare_apple = False
             mock_parse.return_value = mock_args
             
             with patch('os.path.isdir', return_value=True):
@@ -131,6 +132,7 @@ class TestCLIArgumentParsing(unittest.TestCase):
             mock_args.live_max_seconds = 6.0
             mock_args.dedupe_leftovers = False
             mock_args.show_issues = False
+            mock_args.prepare_apple = False
             mock_parse.return_value = mock_args
             
             with patch('os.path.isdir', return_value=True):
@@ -159,6 +161,7 @@ class TestCLIArgumentParsing(unittest.TestCase):
             mock_args.live_max_seconds = 6.0
             mock_args.dedupe_leftovers = False
             mock_args.show_issues = False
+            mock_args.prepare_apple = False
             mock_parse.return_value = mock_args
             
             with patch('os.path.isdir', return_value=True):

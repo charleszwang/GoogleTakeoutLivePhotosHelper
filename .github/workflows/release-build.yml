@@ -51,10 +51,48 @@ jobs:
       - name: Show Python version
         run: python -V
 
-      - name: Build GUI executable
+      # Fetch ExifTool per OS and place under src/google_takeout_live_photos/vendor/exiftool
+      - name: Fetch ExifTool (Linux)
+        if: runner.os == 'Linux'
         run: |
-          pyinstaller --onefile --paths src --windowed --name google-takeout-helper-gui scripts/launch_gui.py
+          sudo apt-get update
+          sudo apt-get install -y libimage-exiftool-perl
+          mkdir -p src/google_takeout_live_photos/vendor/exiftool
+          cp "$(command -v exiftool)" src/google_takeout_live_photos/vendor/exiftool/exiftool
+          chmod +x src/google_takeout_live_photos/vendor/exiftool/exiftool
+
+      - name: Fetch ExifTool (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install exiftool
+          mkdir -p src/google_takeout_live_photos/vendor/exiftool
+          cp "$(which exiftool)" src/google_takeout_live_photos/vendor/exiftool/exiftool
+          chmod +x src/google_takeout_live_photos/vendor/exiftool/exiftool
+
+      - name: Fetch ExifTool (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          choco install exiftool --yes
+          New-Item -ItemType Directory -Force src\google_takeout_live_photos\vendor\exiftool | Out-Null
+          $exe = (Get-Command exiftool.exe).Source
+          Copy-Item $exe src\google_takeout_live_photos\vendor\exiftool\exiftool.exe -Force
+
+      - name: Build GUI executable (macOS/Linux)
+        if: runner.os != 'Windows'
+        run: |
+          pyinstaller --onefile --paths src --windowed --name google-takeout-helper-gui scripts/launch_gui.py \
+            --add-data "src/google_takeout_live_photos/vendor/exiftool/*:exiftool"
         shell: bash
+        working-directory: .
+
+      - name: Build GUI executable (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          pyinstaller --onefile --paths src --windowed --name google-takeout-helper-gui scripts/launch_gui.py \
+            --add-data "src\\google_takeout_live_photos\\vendor\\exiftool\\*;exiftool"
         working-directory: .
 
       - name: Rename artifacts per-OS

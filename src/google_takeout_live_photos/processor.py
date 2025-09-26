@@ -16,6 +16,8 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Union
+import sys
+import uuid
 
 # Constants
 STILL_EXTENSIONS = {".heic", ".jpg", ".jpeg", ".png"}
@@ -69,6 +71,131 @@ class GoogleTakeoutProcessor:
             'matching_conflicts': [],  # Potential matching problems
             'orphaned_videos': []  # Videos that might be Live Photos without partners
         }
+
+    # ------------------------------
+    # Apple Photos preparation
+    # ------------------------------
+    def _resolve_exiftool_path(self) -> Optional[Path]:
+        """Find a bundled or system exiftool executable.
+
+        Search order:
+        1) Bundled with the app under vendor/exiftool/
+        2) PyInstaller temp directory (sys._MEIPASS)/exiftool
+        3) System PATH ('exiftool')
+        """
+        candidates: List[Path] = []
+
+        base_dir = Path(__file__).resolve().parent
+        vendor_dir = base_dir / "vendor" / "exiftool"
+        if sys.platform.startswith("win"):
+            candidates.append(vendor_dir / "exiftool.exe")
+        else:
+            candidates.append(vendor_dir / "exiftool")
+
+        # PyInstaller onefile extraction directory
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass:
+            meipass_dir = Path(meipass) / "exiftool"
+            if sys.platform.startswith("win"):
+                candidates.append(meipass_dir / "exiftool.exe")
+            else:
+                candidates.append(meipass_dir / "exiftool")
+
+        # Check candidates
+        for c in candidates:
+            if c.is_file():
+                try:
+                    # Ensure executable bit on unix
+                    if not sys.platform.startswith("win"):
+                        os.chmod(c, 0o755)
+                except Exception:
+                    pass
+                return c
+
+        # Fallback to system 'exiftool' if available
+        try:
+            result = shutil.which("exiftool")
+            if result:
+                return Path(result)
+        except Exception:
+            pass
+        return None
+
+    def _ensure_real_file(self, path: Path) -> None:
+        """If path is a symlink, replace it with a real file copy to avoid
+        mutating the original source when writing metadata."""
+        try:
+            if path.is_symlink():
+                target = os.readlink(path)
+                path.unlink()
+                shutil.copy2(target, path)
+        except Exception as e:
+            self.logger.warning(f"Failed to replace symlink with copy for {path}: {e}")
+
+    def prepare_for_apple(self) -> None:
+        """Write Apple-compatible Live Photo metadata to paired outputs.
+
+        This sets a shared Content Identifier for each HEIC/JPG + MOV pair
+        so Apple Photos is more likely to recognize them as Live Photos on
+        import. Uses bundled/system ExifTool. Safe to call multiple times.
+        """
+        exiftool = self._resolve_exiftool_path()
+        if not exiftool:
+            self.logger.error("ExifTool not found. Skipping Apple preparation.")
+            self.logger.error("Tip: Install exiftool or use a build that bundles it.")
+            return
+
+        manifest_path = self.pairs_dir / "manifest_pairs.tsv"
+        if not manifest_path.exists():
+            self.logger.error(f"Pairs manifest not found: {manifest_path}")
+            return
+
+        self.logger.info("Preparing Live Photos for Apple Photos import (adding identifiers)...")
+
+        updated = 0
+        failed = 0
+        try:
+            with open(manifest_path, "r") as f:
+                header = f.readline()  # skip header
+                for line in f:
+                    parts = line.rstrip("\n").split("\t")
+                    if len(parts) < 7:
+                        continue
+                    prefix, match_type, base_name, still_src, video_src, still_out, video_out = parts
+                    still_path = Path(still_out)
+                    video_path = Path(video_out)
+
+                    # Replace symlinks with real files to avoid mutating originals
+                    self._ensure_real_file(still_path)
+                    self._ensure_real_file(video_path)
+
+                    cid = uuid.uuid4().hex
+                    try:
+                        # Write to still
+                        subprocess.run([
+                            str(exiftool),
+                            "-overwrite_original",
+                            f"-ContentIdentifier={cid}",
+                            str(still_path)
+                        ], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+                        # Write to video
+                        subprocess.run([
+                            str(exiftool),
+                            "-overwrite_original",
+                            f"-ContentIdentifier={cid}",
+                            str(video_path)
+                        ], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        updated += 1
+                    except subprocess.CalledProcessError as e:
+                        failed += 1
+                        if self.verbose:
+                            self.logger.error(f"ExifTool failed for pair {prefix}: {e}")
+        except Exception as e:
+            self.logger.error(f"Failed to prepare files for Apple Photos: {e}")
+            return
+
+        self.logger.info(f"Apple preparation complete: {updated} pairs updated, {failed} failed")
 
     def safe_link_or_copy(self, src: FilePath, dst: FilePath) -> None:
         """Safely create symlink or copy file, with fallback handling."""

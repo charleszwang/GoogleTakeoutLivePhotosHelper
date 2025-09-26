@@ -219,6 +219,28 @@ class TestGoogleTakeoutProcessor(unittest.TestCase):
         # Should be a copy, not a symlink
         self.assertFalse(dst.is_symlink())
 
+    def test_prepare_for_apple_missing_exiftool(self):
+        """prepare_for_apple should no-op (no raise) when exiftool is missing."""
+        processor = GoogleTakeoutProcessor(
+            root_dir=self.root_dir,
+            pairs_dir=self.pairs_dir,
+            leftovers_dir=self.leftovers_dir,
+            copy_files=True,
+            dry_run=False,
+        )
+        # Create fake outputs and manifest
+        self.pairs_dir.mkdir(parents=True, exist_ok=True)
+        (self.pairs_dir / "00001_IMG_0001__STILL.HEIC").touch()
+        (self.pairs_dir / "00001_IMG_0001__VIDEO.MOV").touch()
+        manifest = self.pairs_dir / "manifest_pairs.tsv"
+        with open(manifest, "w") as f:
+            f.write("pair_id\tmatch_type\tbasename\tstill_src\tvideo_src\tstill_out\tvideo_out\n")
+            f.write(f"00001\tsame_dir\tIMG_0001\t{self.root_dir / 'IMG_0001.HEIC'}\t{self.root_dir / 'IMG_0001.MOV'}\t{self.pairs_dir / '00001_IMG_0001__STILL.HEIC'}\t{self.pairs_dir / '00001_IMG_0001__VIDEO.MOV'}\n")
+        try:
+            processor.prepare_for_apple()
+        except Exception as e:
+            self.fail(f"prepare_for_apple raised unexpectedly: {e}")
+
 
 class TestConstants(unittest.TestCase):
     """Test constants and module-level functionality."""

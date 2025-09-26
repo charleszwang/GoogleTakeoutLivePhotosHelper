@@ -81,6 +81,7 @@ class GoogleTakeoutGUI:
         self.max_duration = tk.DoubleVar(value=6.0)
         self.dedupe_leftovers = tk.BooleanVar(value=False)
         self.show_issues = tk.BooleanVar(value=False)
+        self.prepare_apple = tk.BooleanVar(value=False)
 
         # Processing state
         self.processing = False
@@ -530,9 +531,21 @@ class GoogleTakeoutGUI:
         )
         issues_check.grid(row=5, column=0, columnspan=2, sticky=tk.W, pady=8, padx=15)
 
+        # Prepare for Apple Photos import
+        prepare_check = tk.Checkbutton(
+            options_frame,
+            text="Prepare for Apple Photos import (adds identifiers)",
+            variable=self.prepare_apple,
+            bg=self.current_theme['bg_secondary'],
+            fg=self.current_theme['text_primary'],
+            selectcolor=self.current_theme['bg_accent'],
+            font=("Arial", 10)
+        )
+        prepare_check.grid(row=6, column=0, columnspan=2, sticky=tk.W, pady=8, padx=15)
+
         # Max duration setting
         duration_frame = tk.Frame(options_frame, bg=self.current_theme['bg_secondary'])
-        duration_frame.grid(row=6, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=8, padx=15)
+        duration_frame.grid(row=7, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=8, padx=15)
 
         tk.Label(
             duration_frame, 
@@ -554,7 +567,7 @@ class GoogleTakeoutGUI:
 
         # Enhanced tip section
         tip_frame = tk.Frame(options_frame, bg=self.current_theme['bg_accent'], relief=tk.RAISED, bd=1)
-        tip_frame.grid(row=7, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(15, 10), padx=15)
+        tip_frame.grid(row=8, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(15, 10), padx=15)
         
         tk.Label(
             tip_frame,
@@ -856,6 +869,15 @@ class GoogleTakeoutGUI:
             else:
                 self.log_message("Processing completed successfully!", "SUCCESS")
                 self.update_status("Processing completed")
+
+                # Optional Apple preparation
+                if self.prepare_apple.get():
+                    self.log_message("Preparing Live Photos for Apple Photos import (adding identifiers)...")
+                    try:
+                        self.processor.prepare_for_apple()
+                        self.log_message("Apple import preparation complete", "SUCCESS")
+                    except Exception as e:
+                        self.log_message(f"Apple preparation failed: {str(e)}", "ERROR")
                 self.show_results()
                 
                 # Show detailed issues if requested

@@ -50,6 +50,8 @@ Examples:
                        help="Skip duplicate files in leftovers (prevents same file in both output folders)")
     parser.add_argument("--show-issues", action="store_true",
                        help="Show detailed report of potential issues and conflicts")
+    parser.add_argument("--prepare-apple", action="store_true",
+                       help="After processing, write Apple-compatible identifiers to pairs (bundled exiftool)")
     parser.add_argument("--version", action="version", version=f"Google Takeout Live Photos Helper {DISPLAY_VERSION}")
     
     args = parser.parse_args()
@@ -107,6 +109,11 @@ Examples:
         )
         
         processor.process()
+
+        # Optional Apple preparation
+        if args.prepare_apple and not args.dry_run:
+            print("\n🧩 Preparing Live Photos for Apple Photos import...")
+            processor.prepare_for_apple()
         
         # Show detailed issues if requested
         if args.show_issues and not args.verbose:  # verbose already shows issues
