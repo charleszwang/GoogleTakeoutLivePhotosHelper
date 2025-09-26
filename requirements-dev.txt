@@ -15,3 +15,7 @@ pycodestyle>=2.11
 pydocstyle>=6.3
 vulture>=2.10
 safety>=2.3
+
+# Executable creation
+pyinstaller>=6.0
+auto-py-to-exe>=2.4

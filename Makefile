@@ -73,6 +73,19 @@ pre-commit:
 build:
 	python -m build
 
+# Build standalone executable
+build-exe:
+	@echo "Building standalone executable..."
+	pip install pyinstaller>=6.0
+	python build_executable.py
+
+# Build executable for distribution
+build-exe-dist: build-exe
+	@echo "Creating distribution package..."
+	mkdir -p dist/release
+	cp dist/GoogleTakeoutHelper* dist/release/
+	@echo "✅ Executable ready for distribution in dist/release/"
+
 # Clean build artifacts
 clean:
 	rm -rf build/

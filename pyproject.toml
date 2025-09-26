@@ -8,7 +8,7 @@ version = "1.0.0"
 authors = [
     {name = "Your Name", email = "your.email@example.com"},
 ]
-description = "A tool to organize Google Takeout exports by matching Live Photos pairs and separating standalone media files"
+description = "Transform messy Google Takeout exports into organized Live Photos and sorted media files with an intuitive GUI"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -26,7 +26,7 @@ classifiers = [
     "Topic :: System :: Archiving",
     "Topic :: Utilities",
 ]
-keywords = ["google-photos", "takeout", "live-photos", "photo-organization", "media-management"]
+keywords = ["google-photos", "takeout", "live-photos", "photo-organization", "media-management", "gui", "desktop-app"]
 dependencies = []
 
 [project.optional-dependencies]

@@ -171,11 +171,20 @@ ehthumbs.db
 Thumbs.db
 
 # Test directories and files
-test_output/
+test_output*/
 test_takeout/
+test_final/
 pairs/
 leftovers/
+
+# Old files
+README_OLD.md
 
 # Temporary files
 *.tmp
 *.temp
+
+# Build artifacts
+build/
+build_env/
+*.spec

@@ -1,16 +1,19 @@
 """
 Integration tests for the Google Takeout Live Photos Helper.
+
+End-to-end tests that verify the complete workflow from command-line
+invocation through file processing and output generation.
 """
 
 import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-import subprocess
-import sys
 
-# Add parent directory to path to import the module
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add src directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
 
 class TestIntegration(unittest.TestCase):

@@ -1,17 +1,29 @@
 """
 Unit tests for GoogleTakeoutProcessor class.
+
+Comprehensive test suite covering all processor functionality including:
+- File scanning and indexing
+- Live Photos pair matching
+- Duplicate detection and validation
+- Issue reporting and statistics
 """
 
 import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch, mock_open
+from unittest.mock import patch
 
-import sys
+# Add src directory to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src'))
 
-from google_takeout_live_photos.processor import GoogleTakeoutProcessor, STILL_EXTENSIONS, VIDEO_EXTENSIONS
+from google_takeout_live_photos.processor import (
+    GoogleTakeoutProcessor, 
+    STILL_EXTENSIONS, 
+    VIDEO_EXTENSIONS,
+    ALL_EXTENSIONS
+)
 
 
 class TestGoogleTakeoutProcessor(unittest.TestCase):

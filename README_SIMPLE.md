@@ -4,14 +4,6 @@
 
 When you export photos from Google Photos, Live Photos get split into separate image and video files. This tool puts them back together and organizes everything neatly.
 
-## 💡 **Quick Migration Tip**
-
-**If you still have access to Google Photos and just want to migrate to iCloud:**
-1. Open Google Photos app on your phone
-2. Select a whole month of photos 
-3. Share → Save to Device
-4. **This tool is for people who've lost access to their Google Photos account**
-
 ## 💖 Support This Project
 
 If this tool helps you organize your Google Photos, please consider supporting its development:
@@ -73,12 +65,11 @@ Takeout/                          # ← Your main folder
 ## 🖥️ Using the GUI (Easiest)
 
 1. **Launch the app** (download from releases or run `python google_takeout_live_photos_helper.py --gui`)
-2. **Toggle dark mode** if the interface is too bright (🌙 Dark Mode button)
-3. **Select your Takeout folder** - click "Browse Takeout Folder"
-4. **Choose output location** - click "Browse Output Folder" 
-5. **Check "Dry run"** to preview first (recommended!)
-6. **Click "🚀 Process Photos"**
-7. **Review results** and run again without dry run if happy
+2. **Select your Takeout folder** - click "Browse Takeout Folder"
+3. **Choose output location** - click "Browse Output Folder" 
+4. **Check "Dry run"** to preview first (recommended!)
+5. **Click "🚀 Process Photos"**
+6. **Review results** and run again without dry run if happy
 
 ## 📋 **Step-by-Step CLI Walkthrough**
 

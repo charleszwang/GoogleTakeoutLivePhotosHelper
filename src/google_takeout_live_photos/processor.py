@@ -1,15 +1,21 @@
 """
 Core processing logic for Google Takeout Live Photos Helper.
+
+This module contains the main GoogleTakeoutProcessor class that handles:
+- File scanning and indexing
+- Live Photos pair matching
+- Duplicate detection and validation
+- File organization and manifest creation
 """
 
+import hashlib
+import logging
 import os
 import shutil
 import subprocess
-import hashlib
-import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple, Set, Optional, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 # Constants
 STILL_EXTENSIONS = {".heic", ".jpg", ".jpeg", ".png"}
@@ -60,7 +66,8 @@ class GoogleTakeoutProcessor:
         self.issues = {
             'duplicate_names': [],  # Files with same base name in different locations
             'structure_warnings': [],  # Structure issues
-            'matching_conflicts': []  # Potential matching problems
+            'matching_conflicts': [],  # Potential matching problems
+            'orphaned_videos': []  # Videos that might be Live Photos without partners
         }
 
     def safe_link_or_copy(self, src: FilePath, dst: FilePath) -> None:
@@ -193,6 +200,31 @@ class GoogleTakeoutProcessor:
         if conflicts > 0:
             self.logger.warning(f"Found {conflicts} potential matching conflicts")
             self.logger.warning("Some Live Photos may not pair correctly due to duplicate names")
+
+    def detect_orphaned_videos(self, videos_by_base: Dict, used_files: Set[str]) -> None:
+        """Detect videos that might be orphaned Live Photos without photo partners."""
+        self.logger.info("Checking for potential orphaned Live Photo videos...")
+        
+        orphaned_count = 0
+        for base_name, video_list in videos_by_base.items():
+            for video_path in video_list:
+                if video_path in used_files:
+                    continue  # Already paired
+                
+                # Check if video duration suggests it might be a Live Photo
+                if self.max_video_duration and self.max_video_duration > 0:
+                    duration = self.get_video_duration(video_path)
+                    if duration is not None and duration <= self.max_video_duration:
+                        orphaned_count += 1
+                        self.issues['orphaned_videos'].append({
+                            'base_name': base_name,
+                            'video_path': video_path,
+                            'duration': duration
+                        })
+        
+        if orphaned_count > 0:
+            self.logger.warning(f"Found {orphaned_count} videos that might be orphaned Live Photos")
+            self.logger.warning("These videos are short enough to be Live Photos but have no photo partner")
 
     @staticmethod
     def calculate_sha1(file_path: FilePath) -> str:
@@ -390,6 +422,9 @@ class GoogleTakeoutProcessor:
         # Find pairs
         pairs, used_files = self.find_pairs(by_dir_base, stills_by_base, videos_by_base)
         
+        # Check for orphaned videos after pairing
+        self.detect_orphaned_videos(videos_by_base, used_files)
+        
         # Process pairs
         pair_hashes = self.process_pairs(pairs)
         
@@ -430,7 +465,11 @@ class GoogleTakeoutProcessor:
             print(f"   Leftovers manifest:   {self.leftovers_dir / 'manifest_leftovers.tsv'}")
         
         # Warnings and issues
-        if self.stats['duplicate_names'] > 0 or self.stats['potential_issues'] > 0:
+        has_warnings = (self.stats['duplicate_names'] > 0 or 
+                       self.stats['potential_issues'] > 0 or 
+                       len(self.issues['orphaned_videos']) > 0)
+        
+        if has_warnings:
             print(f"\n⚠️  WARNINGS:")
             
             if self.stats['duplicate_names'] > 0:
@@ -440,6 +479,10 @@ class GoogleTakeoutProcessor:
             if self.stats['potential_issues'] > 0:
                 print(f"   ❗ {self.stats['potential_issues']} potential matching conflicts detected")
                 print(f"      Some Live Photos may not pair correctly")
+                
+            if len(self.issues['orphaned_videos']) > 0:
+                print(f"   🎥 {len(self.issues['orphaned_videos'])} orphaned videos found (≤{self.max_video_duration}s)")
+                print(f"      These might be Live Photos missing their photo partners")
         
         if self.issues['structure_warnings']:
             print(f"\n📋 STRUCTURE NOTES:")
@@ -451,11 +494,19 @@ class GoogleTakeoutProcessor:
         else:
             print(f"\n✅ Processing completed successfully!")
             
+            # Show donation prompt for successful processing
+            total_pairs = self.stats['same_dir_pairs'] + self.stats['cross_dir_pairs']
+            if total_pairs > 0:
+                print(f"\n💖 SUCCESS! Organized {total_pairs} Live Photos!")
+                print(f"   If this tool saved you time, please consider supporting it:")
+                print(f"   🎁 Donate: https://www.paypal.com/donate/?hosted_button_id=FPEZJUYKMH7M6")
+                print(f"   ⭐ Star: https://github.com/yourusername/google-takeout-live-photos-helper")
+            
         print("="*50)
 
     def print_detailed_issues(self) -> None:
         """Print detailed information about detected issues."""
-        if not (self.issues['duplicate_names'] or self.issues['matching_conflicts']):
+        if not (self.issues['duplicate_names'] or self.issues['matching_conflicts'] or self.issues['orphaned_videos']):
             return
             
         print(f"\n" + "="*60)
@@ -491,9 +542,24 @@ class GoogleTakeoutProcessor:
             if len(self.issues['matching_conflicts']) > 5:
                 print(f"   ... and {len(self.issues['matching_conflicts']) - 5} more conflicts")
         
+        # Orphaned videos details
+        if self.issues['orphaned_videos']:
+            print(f"\n🎥 ORPHANED VIDEOS ({len(self.issues['orphaned_videos'])} videos):")
+            print("-" * 40)
+            
+            for i, orphan in enumerate(self.issues['orphaned_videos'][:10], 1):  # Show first 10
+                print(f"{i}. '{orphan['base_name']}' ({orphan['duration']:.1f}s)")
+                print(f"   📄 {orphan['video_path']}")
+                print(f"   💡 Short video without matching photo - might be orphaned Live Photo")
+                print()
+            
+            if len(self.issues['orphaned_videos']) > 10:
+                print(f"   ... and {len(self.issues['orphaned_videos']) - 10} more orphaned videos")
+        
         print("\n💡 RECOMMENDATIONS:")
         print("   1. Check for duplicate exports in your Google Takeout")
         print("   2. Consider manually reviewing conflicted files")
-        print("   3. Use --verbose flag for more detailed logging")
-        print("   4. Run with --dry-run first to preview results")
+        print("   3. Orphaned videos might need manual pairing or could be standalone clips")
+        print("   4. Use --verbose flag for more detailed logging")
+        print("   5. Run with --dry-run first to preview results")
         print("="*60)
