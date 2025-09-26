@@ -1,0 +1,109 @@
+name: Build and Upload Executables
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build binaries (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            py: '3.11'
+            gui: false
+          - os: macos-latest
+            py: '3.11'
+            gui: true
+          - os: windows-latest
+            py: '3.11'
+            gui: true
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip wheel setuptools
+
+      - name: Install build deps
+        run: |
+          python -m pip install pyinstaller
+
+      - name: Show Python version
+        run: python -V
+
+      - name: Build CLI executable
+        run: |
+          pyinstaller --onefile --name google-takeout-helper google_takeout_live_photos_helper.py
+        shell: bash
+        working-directory: .
+
+      - name: Build GUI executable (if applicable)
+        if: matrix.gui == true
+        run: |
+          pyinstaller --onefile --windowed --name google-takeout-helper-gui scripts/launch_gui.py
+        shell: bash
+        working-directory: .
+
+      - name: Rename artifacts per-OS
+        run: |
+          set -e
+          OS_NAME=${{ runner.os }}
+          mkdir -p dist/upload
+          # CLI
+          if [ "$OS_NAME" = "Windows" ]; then
+            mv dist/google-takeout-helper.exe dist/upload/google-takeout-helper-${{ runner.os }}.exe
+          else
+            mv dist/google-takeout-helper dist/upload/google-takeout-helper-${{ runner.os }}
+          fi
+          # GUI
+          if [ "${{ matrix.gui }}" = "true" ]; then
+            if [ "$OS_NAME" = "Windows" ]; then
+              mv dist/google-takeout-helper-gui.exe dist/upload/google-takeout-helper-gui-${{ runner.os }}.exe
+            else
+              mv dist/google-takeout-helper-gui dist/upload/google-takeout-helper-gui-${{ runner.os }}
+            fi
+          fi
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ runner.os }}
+          path: dist/upload/*
+
+  release:
+    name: Upload release assets
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/all
+
+      - name: Display downloaded files
+        run: |
+          ls -R dist/all | cat
+
+      - name: Upload assets to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/all/**/google-takeout-helper-*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
