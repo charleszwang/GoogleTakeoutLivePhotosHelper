@@ -11,7 +11,8 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -21,21 +22,23 @@ jobs:
     - name: Install PyInstaller
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller
+        pip install pyinstaller==6.0.0
     
     - name: Build Windows executable
       run: |
         pyinstaller --onefile --windowed --name "GoogleTakeoutHelper" --add-data "src/google_takeout_live_photos;google_takeout_live_photos" src/google_takeout_live_photos/gui_app.py
     
     - name: Upload Windows executable
-      uses: softprops/action-gh-release@v1
-      with:
-        files: dist/GoogleTakeoutHelper.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release upload ${{ github.event.release.tag_name }} dist/GoogleTakeoutHelper.exe
 
   build-macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -45,25 +48,24 @@ jobs:
     - name: Install PyInstaller
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller
+        pip install pyinstaller==6.0.0
     
     - name: Build macOS executable
       run: |
         pyinstaller --onefile --windowed --name "GoogleTakeoutHelper" --add-data "src/google_takeout_live_photos:google_takeout_live_photos" src/google_takeout_live_photos/gui_app.py
-    
-    - name: Zip macOS app
-      run: |
         zip -r GoogleTakeoutHelper-macOS.zip dist/GoogleTakeoutHelper.app
     
     - name: Upload macOS executable
-      uses: softprops/action-gh-release@v1
-      with:
-        files: GoogleTakeoutHelper-macOS.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release upload ${{ github.event.release.tag_name }} GoogleTakeoutHelper-macOS.zip
 
   build-linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -73,13 +75,14 @@ jobs:
     - name: Install PyInstaller
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller
+        pip install pyinstaller==6.0.0
     
     - name: Build Linux executable
       run: |
         pyinstaller --onefile --windowed --name "GoogleTakeoutHelper" --add-data "src/google_takeout_live_photos:google_takeout_live_photos" src/google_takeout_live_photos/gui_app.py
     
     - name: Upload Linux executable
-      uses: softprops/action-gh-release@v1
-      with:
-        files: dist/GoogleTakeoutHelper
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release upload ${{ github.event.release.tag_name }} dist/GoogleTakeoutHelper
