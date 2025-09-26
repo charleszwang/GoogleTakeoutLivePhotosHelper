@@ -50,13 +50,16 @@ The tool:
 
 ## 🚀 **Easy Download & Run (Recommended)**
 
-**No installation required! Just download and double-click:**
+**Simple setup:**
 
-- **macOS**: Download `GoogleTakeoutHelper.app` from [Releases](https://github.com/yourusername/google-takeout-live-photos-helper/releases)
-- **Windows**: Download `GoogleTakeoutHelper.exe` from [Releases](https://github.com/yourusername/google-takeout-live-photos-helper/releases)  
-- **Linux**: Download `GoogleTakeoutHelper` from [Releases](https://github.com/yourusername/google-takeout-live-photos-helper/releases)
+1. **Install Python** from [python.org](https://python.org) (if you don't have it)
+2. **Download this repository** (green "Code" button → Download ZIP)
+3. **Run the tool:**
+   ```bash
+   python google_takeout_live_photos_helper.py --gui
+   ```
 
-**Works immediately - no Python, no command line, no technical knowledge needed!** 🎉
+**Cross-platform - works on Windows, macOS, and Linux!** 🎉
 
 ## 📋 Setting Up Your Google Takeout Data
 
