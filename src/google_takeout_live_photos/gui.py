@@ -23,6 +23,7 @@ from tkinter import filedialog, messagebox, scrolledtext, ttk
 from typing import Optional
 
 from .processor import GoogleTakeoutProcessor
+from ._version import __version__, DISPLAY_VERSION
 
 # UI Theme Colors
 LIGHT_THEME = {
@@ -159,10 +160,10 @@ class GoogleTakeoutGUI:
         # Dark mode toggle in top right corner
         self.setup_theme_toggle(main_frame, current_row)
         
-        # Elegant title with enhanced styling
+        # Elegant title with version
         title_label = ttk.Label(
             main_frame,
-            text="Google Takeout Live Photos Helper",
+            text=f"Google Takeout Live Photos Helper v{__version__}",
             font=("Arial", 18, "bold"),
         )
         title_label.grid(row=current_row, column=0, columnspan=2, pady=(0, 15), sticky=tk.W)

@@ -105,6 +105,19 @@ build-exe-dist: build-exe
 	cp dist/GoogleTakeoutHelper* dist/release/
 	@echo "✅ Executable ready for distribution in dist/release/"
 
+# Version management
+version-patch:
+	python scripts/bump_version.py patch
+
+version-minor:
+	python scripts/bump_version.py minor
+
+version-major:
+	python scripts/bump_version.py major
+
+version-check:
+	@python -c "from src.google_takeout_live_photos._version import DISPLAY_VERSION; print(f'Current version: {DISPLAY_VERSION}')"
+
 # Clean build artifacts
 clean:
 	rm -rf build/

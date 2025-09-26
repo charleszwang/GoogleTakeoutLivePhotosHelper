@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "google-takeout-live-photos-helper"
-version = "1.0.0"
+dynamic = ["version"]
 authors = [
     {name = "Your Name", email = "your.email@example.com"},
 ]
@@ -50,6 +50,9 @@ google-takeout-helper-gui = "google_takeout_live_photos.gui:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["google_takeout_live_photos*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "google_takeout_live_photos._version.__version__"}
 
 [tool.black]
 line-length = 100

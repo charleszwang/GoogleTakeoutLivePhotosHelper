@@ -12,12 +12,13 @@ import sys
 from pathlib import Path
 
 from .processor import GoogleTakeoutProcessor
+from ._version import __version__, DISPLAY_VERSION
 
 
 def main():
     """Main entry point for CLI."""
     parser = argparse.ArgumentParser(
-        description="Google Takeout Live Photos Helper - Organize Live Photos pairs and standalone media files",
+        description=f"Google Takeout Live Photos Helper v{__version__} - Organize Live Photos pairs and standalone media files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -49,6 +50,7 @@ Examples:
                        help="Skip duplicate files in leftovers (prevents same file in both output folders)")
     parser.add_argument("--show-issues", action="store_true",
                        help="Show detailed report of potential issues and conflicts")
+    parser.add_argument("--version", action="version", version=f"Google Takeout Live Photos Helper {DISPLAY_VERSION}")
     
     args = parser.parse_args()
 

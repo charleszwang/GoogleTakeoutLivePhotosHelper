@@ -4,11 +4,12 @@ This guide is for developers who want to contribute to or build upon the Google 
 
 ## 📊 Project Status
 
-![Build Status](https://github.com/yourusername/google-takeout-live-photos-helper/workflows/CI/badge.svg)
 ![Coverage](https://img.shields.io/badge/coverage-44%25-yellow)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)
+
+> **Note**: Build status badge will appear automatically once you push to GitHub and the CI workflow runs.
 
 ## 📊 Current Coverage Status
 

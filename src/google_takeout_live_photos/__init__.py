@@ -5,11 +5,12 @@ A tool to organize Google Takeout exports by matching Live Photos pairs
 and separating standalone media files into organized directories.
 """
 
-__version__ = "1.0.0"
+from ._version import __version__, __version_info__, DISPLAY_VERSION
+
 __author__ = "Your Name"
 __email__ = "your.email@example.com"
-__description__ = "Organize Google Takeout Live Photos pairs and standalone media files"
+__description__ = "Transform messy Google Takeout exports into organized Live Photos and sorted media files"
 
 from .processor import GoogleTakeoutProcessor
 
-__all__ = ["GoogleTakeoutProcessor"]
+__all__ = ["GoogleTakeoutProcessor", "__version__", "__version_info__", "DISPLAY_VERSION"]

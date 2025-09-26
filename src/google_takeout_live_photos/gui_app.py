@@ -49,13 +49,19 @@ def main():
         menubar.add_cascade(label="Help", menu=help_menu)
         help_menu.add_command(label="💖 Support This Project", command=app.show_support_info)
         help_menu.add_separator()
-        help_menu.add_command(label="About", command=lambda: tk.messagebox.showinfo(
-            "About", 
-            "Google Takeout Live Photos Helper v1.0\n\n"
-            "Organize your Google Photos exports by matching\n"
-            "Live Photos pairs and organizing media files.\n\n"
-            "Free and open source software."
-        ))
+        def show_about():
+            from ._version import DISPLAY_VERSION
+            tk.messagebox.showinfo(
+                "About", 
+                f"Google Takeout Live Photos Helper\n"
+                f"Version {DISPLAY_VERSION}\n\n"
+                "Transform messy Google Takeout exports into\n"
+                "organized Live Photos and sorted media files.\n\n"
+                "Free and open source software.\n"
+                "Developed with AI assistance."
+            )
+        
+        help_menu.add_command(label="About", command=show_about)
         
         # Handle window close event gracefully
         def on_closing():
