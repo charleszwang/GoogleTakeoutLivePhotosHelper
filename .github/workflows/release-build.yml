@@ -46,14 +46,14 @@ jobs:
 
       - name: Build CLI executable
         run: |
-          pyinstaller --onefile --name google-takeout-helper google_takeout_live_photos_helper.py
+          pyinstaller --onefile --paths src --name google-takeout-helper google_takeout_live_photos_helper.py
         shell: bash
         working-directory: .
 
       - name: Build GUI executable (if applicable)
         if: matrix.gui == true
         run: |
-          pyinstaller --onefile --windowed --name google-takeout-helper-gui scripts/launch_gui.py
+          pyinstaller --onefile --paths src --windowed --name google-takeout-helper-gui scripts/launch_gui.py
         shell: bash
         working-directory: .
 
@@ -98,12 +98,17 @@ jobs:
         run: |
           ls -R dist/all | cat
 
-      - name: Upload assets to release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/all/**/google-takeout-helper-*
+      - name: Upload assets to release via gh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          echo "Uploading assets to release $TAG_NAME"
+          shopt -s globstar nullglob
+          files=(dist/all/**/google-takeout-helper-*)
+          for f in "${files[@]}"; do
+            echo "Uploading $f"
+            gh release upload "$TAG_NAME" "$f" --clobber
+          done
 
 
