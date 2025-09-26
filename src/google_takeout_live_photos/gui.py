@@ -194,7 +194,21 @@ class GoogleTakeoutGUI:
             justify=tk.CENTER,
             font=("Arial", 9)
         )
-        tip_label.grid(row=current_row, column=0, columnspan=3, pady=(0, 15))
+        tip_label.grid(row=current_row, column=0, columnspan=3, pady=(0, 10))
+        current_row += 1
+
+        # Privacy notice
+        privacy_text = (
+            "🔒 Privacy: All processing happens locally on your computer.\n"
+            "No photos are sent to any server - everything stays private on your device."
+        )
+        privacy_label = ttk.Label(
+            main_frame,
+            text=privacy_text,
+            justify=tk.CENTER,
+            font=("Arial", 9)
+        )
+        privacy_label.grid(row=current_row, column=0, columnspan=3, pady=(0, 15))
         current_row += 1
 
         # Prominent donation section with enhanced styling

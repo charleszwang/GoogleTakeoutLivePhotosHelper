@@ -12,6 +12,18 @@
 
 **This tool is for people who've lost access to their Google Photos account or have massive exports that are too big to download via the app.**
 
+## 🔒 **Privacy & Security**
+
+**Your photos are completely private and secure:**
+
+- **🏠 Everything happens on your computer** - no cloud processing
+- **🚫 No data sent anywhere** - your photos never leave your device
+- **🔒 Works offline** - no internet connection needed
+- **👀 No tracking** - the tool doesn't collect any information about you
+- **🔐 Open source** - you can see exactly what the code does
+
+**Perfect for sensitive photos - everything stays private on your device.**
+
 ## 🎯 What This Tool Does
 
 When you export photos from Google Photos, Live Photos get split into separate image and video files. This tool puts them back together and organizes everything neatly.

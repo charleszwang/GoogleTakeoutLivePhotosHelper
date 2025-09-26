@@ -31,6 +31,19 @@ If this tool helps you organize your Google Photos, please consider supporting i
 
 *This project was developed with the assistance of AI to create a professional, user-friendly tool for the community.*
 
+## 🔒 **Privacy & Security**
+
+**Your photos stay 100% private and secure:**
+
+- **🏠 All processing happens locally** on your computer
+- **🚫 No data sent to servers** - nothing leaves your machine
+- **🔒 No internet connection required** for processing
+- **👀 No tracking or analytics** - completely private
+- **💾 Your files stay on your device** - only organized locally
+- **🔐 Open source code** - you can verify exactly what it does
+
+**This tool is designed for maximum privacy and security of your personal photos.**
+
 ## 🎯 What it does
 
 **Before:** Messy folders with thousands of scattered files  
