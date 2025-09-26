@@ -118,7 +118,7 @@ class TestIntegration(unittest.TestCase):
         self.assertFalse(self.leftovers_dir.exists())
         
         # Should mention dry run in output
-        self.assertIn("dry run", result.stdout)
+        self.assertIn("DRY RUN MODE", result.stdout)
 
     def test_copy_mode(self):
         """Test copy mode instead of symlinks."""
@@ -152,7 +152,7 @@ class TestIntegration(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         
         # Verbose mode should produce more detailed output
-        self.assertIn("[pair:", result.stdout)
+        self.assertIn("INFO:", result.stdout)
         self.assertGreater(len(result.stdout), 100)  # Should be substantial output
 
     def test_duration_filtering(self):

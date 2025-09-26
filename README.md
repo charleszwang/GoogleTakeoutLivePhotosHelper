@@ -25,7 +25,7 @@ If this tool helps you organize your Google Photos, please consider supporting i
 ---
 
 ![Build Status](https://github.com/yourusername/google-takeout-live-photos-helper/workflows/CI/badge.svg)
-![Coverage](https://img.shields.io/codecov/c/github/yourusername/google-takeout-live-photos-helper)
+![Coverage](https://img.shields.io/badge/coverage-44%25-yellow)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 

@@ -44,9 +44,11 @@ coverage-badge:
 	coverage report --show-missing
 	coverage html
 	coverage xml
+	python scripts/update_coverage_badge.py
 	@echo "📊 Coverage reports generated:"
 	@echo "   HTML: htmlcov/index.html"
 	@echo "   XML: coverage.xml"
+	@echo "   Badge updated in README.md"
 
 # Code formatting
 format:
