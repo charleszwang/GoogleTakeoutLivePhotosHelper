@@ -50,7 +50,17 @@ class GoogleTakeoutProcessor:
             'same_dir_pairs': 0,
             'cross_dir_pairs': 0,
             'leftovers_staged': 0,
-            'leftovers_skipped': 0
+            'leftovers_skipped': 0,
+            'duplicate_names': 0,
+            'potential_issues': 0,
+            'takeout_folders_found': 0
+        }
+        
+        # Issue tracking
+        self.issues = {
+            'duplicate_names': [],  # Files with same base name in different locations
+            'structure_warnings': [],  # Structure issues
+            'matching_conflicts': []  # Potential matching problems
         }
 
     def safe_link_or_copy(self, src: FilePath, dst: FilePath) -> None:
@@ -93,6 +103,97 @@ class GoogleTakeoutProcessor:
             logging.getLogger(__name__).warning(f"Failed to get duration for {video_path}: {e}")
             return None
 
+    def validate_takeout_structure(self) -> bool:
+        """Validate that the root directory looks like a proper Google Takeout structure."""
+        self.logger.info("Validating Google Takeout structure...")
+        
+        # Look for typical Google Takeout folder patterns
+        takeout_indicators = [
+            "Google Photos",
+            "Takeout",
+            "Photos from",
+            "Google Foto",  # International versions
+        ]
+        
+        found_indicators = []
+        for root, dirs, _ in os.walk(self.root_dir):
+            for dir_name in dirs:
+                for indicator in takeout_indicators:
+                    if indicator in dir_name:
+                        found_indicators.append(os.path.join(root, dir_name))
+                        self.stats['takeout_folders_found'] += 1
+        
+        if not found_indicators:
+            self.issues['structure_warnings'].append(
+                "No typical Google Takeout folder structure detected. "
+                "Expected folders like 'Google Photos', 'Photos from YYYY', etc."
+            )
+            self.logger.warning("Directory structure doesn't look like Google Takeout")
+            return False
+        
+        self.logger.info(f"Found {len(found_indicators)} Google Takeout folders")
+        for folder in found_indicators[:5]:  # Show first 5
+            self.logger.info(f"  - {folder}")
+        if len(found_indicators) > 5:
+            self.logger.info(f"  ... and {len(found_indicators) - 5} more")
+        
+        return True
+
+    def detect_duplicate_names(self, stills_by_base: Dict, videos_by_base: Dict) -> None:
+        """Detect and warn about files with duplicate base names."""
+        self.logger.info("Checking for duplicate file names...")
+        
+        # Check for still images with duplicate names
+        for base_name, file_list in stills_by_base.items():
+            if len(file_list) > 1:
+                self.stats['duplicate_names'] += 1
+                self.issues['duplicate_names'].append({
+                    'type': 'still',
+                    'base_name': base_name,
+                    'files': file_list,
+                    'count': len(file_list)
+                })
+        
+        # Check for videos with duplicate names
+        for base_name, file_list in videos_by_base.items():
+            if len(file_list) > 1:
+                self.stats['duplicate_names'] += 1
+                self.issues['duplicate_names'].append({
+                    'type': 'video',
+                    'base_name': base_name,
+                    'files': file_list,
+                    'count': len(file_list)
+                })
+        
+        if self.stats['duplicate_names'] > 0:
+            self.logger.warning(f"Found {self.stats['duplicate_names']} sets of files with duplicate names")
+            self.logger.warning("This may cause incorrect Live Photo pairing!")
+
+    def detect_matching_conflicts(self, stills_by_base: Dict, videos_by_base: Dict) -> None:
+        """Detect potential conflicts in Live Photo matching."""
+        self.logger.info("Checking for potential matching conflicts...")
+        
+        conflicts = 0
+        for base_name in set(stills_by_base.keys()) & set(videos_by_base.keys()):
+            still_count = len(stills_by_base[base_name])
+            video_count = len(videos_by_base[base_name])
+            
+            # Multiple stills or videos with same name = potential conflict
+            if still_count > 1 or video_count > 1:
+                conflicts += 1
+                self.issues['matching_conflicts'].append({
+                    'base_name': base_name,
+                    'still_count': still_count,
+                    'video_count': video_count,
+                    'still_files': stills_by_base[base_name],
+                    'video_files': videos_by_base[base_name]
+                })
+        
+        self.stats['potential_issues'] = conflicts
+        if conflicts > 0:
+            self.logger.warning(f"Found {conflicts} potential matching conflicts")
+            self.logger.warning("Some Live Photos may not pair correctly due to duplicate names")
+
     @staticmethod
     def calculate_sha1(file_path: FilePath) -> str:
         """Calculate SHA1 hash of a file."""
@@ -133,6 +234,11 @@ class GoogleTakeoutProcessor:
                     videos_by_base[base_name].append(full_path)
 
         self.logger.info(f"Scanned {self.stats['total_scanned']} files")
+        
+        # Run validation and issue detection
+        self.detect_duplicate_names(stills_by_base, videos_by_base)
+        self.detect_matching_conflicts(stills_by_base, videos_by_base)
+        
         return by_dir_base, stills_by_base, videos_by_base
 
     def find_pairs(self, by_dir_base: Dict, stills_by_base: Dict, videos_by_base: Dict) -> Tuple[List[PairInfo], Set[str]]:
@@ -271,6 +377,13 @@ class GoogleTakeoutProcessor:
         if not self.root_dir.is_dir():
             raise FileNotFoundError(f"Root directory does not exist: {self.root_dir}")
         
+        # Validate Google Takeout structure
+        structure_valid = self.validate_takeout_structure()
+        if not structure_valid and not self.dry_run:
+            self.logger.warning("⚠️  Directory structure validation failed!")
+            self.logger.warning("This may not be a proper Google Takeout directory.")
+            self.logger.warning("Expected structure: Takeout/Google Photos/Photos from YYYY/...")
+        
         # Scan and index files
         by_dir_base, stills_by_base, videos_by_base = self.scan_media_files()
         
@@ -285,21 +398,102 @@ class GoogleTakeoutProcessor:
         
         # Print summary
         self.print_summary()
+        
+        # Print detailed issues if there are any significant problems
+        if (self.stats['duplicate_names'] > 0 or self.stats['potential_issues'] > 0) and self.verbose:
+            self.print_detailed_issues()
 
     def print_summary(self) -> None:
         """Print processing summary."""
-        print("\n--- Summary ---")
-        print(f"Scanned files:        {self.stats['total_scanned']}")
-        print(f"Pairs (same folder):  {self.stats['same_dir_pairs']}")
-        print(f"Pairs (cross folder): {self.stats['cross_dir_pairs']}")
-        print(f"Total pairs staged:   {self.stats['same_dir_pairs'] + self.stats['cross_dir_pairs']}")
-        print(f"Leftovers staged:     {self.stats['leftovers_staged']}")
+        print("\n" + "="*50)
+        print("📊 PROCESSING SUMMARY")
+        print("="*50)
+        
+        # File statistics
+        print(f"📁 Files scanned:        {self.stats['total_scanned']:,}")
+        print(f"📸 Live Photos found:")
+        print(f"   Same folder pairs:    {self.stats['same_dir_pairs']:,}")
+        print(f"   Cross folder pairs:   {self.stats['cross_dir_pairs']:,}")
+        print(f"   Total pairs:          {self.stats['same_dir_pairs'] + self.stats['cross_dir_pairs']:,}")
+        print(f"📄 Other media files:    {self.stats['leftovers_staged']:,}")
+        
         if self.dedupe_leftovers:
-            print(f"Leftovers skipped (dupe): {self.stats['leftovers_skipped']}")
-        print(f"Pairs dir:            {self.pairs_dir}")
-        print(f"Leftovers dir:        {self.leftovers_dir}")
+            print(f"🗑️  Duplicates skipped:    {self.stats['leftovers_skipped']:,}")
+        
+        # Output locations
+        print(f"\n📂 Output locations:")
+        print(f"   Live Photos pairs:    {self.pairs_dir}")
+        print(f"   Other media:          {self.leftovers_dir}")
+        
         if not self.dry_run:
-            print(f"Pairs manifest:       {self.pairs_dir / 'manifest_pairs.tsv'}")
-            print(f"Leftovers manifest:   {self.leftovers_dir / 'manifest_leftovers.tsv'}")
+            print(f"   Pairs manifest:       {self.pairs_dir / 'manifest_pairs.tsv'}")
+            print(f"   Leftovers manifest:   {self.leftovers_dir / 'manifest_leftovers.tsv'}")
+        
+        # Warnings and issues
+        if self.stats['duplicate_names'] > 0 or self.stats['potential_issues'] > 0:
+            print(f"\n⚠️  WARNINGS:")
+            
+            if self.stats['duplicate_names'] > 0:
+                print(f"   🔄 {self.stats['duplicate_names']} sets of files with duplicate names found")
+                print(f"      This may affect Live Photo pairing accuracy!")
+                
+            if self.stats['potential_issues'] > 0:
+                print(f"   ❗ {self.stats['potential_issues']} potential matching conflicts detected")
+                print(f"      Some Live Photos may not pair correctly")
+        
+        if self.issues['structure_warnings']:
+            print(f"\n📋 STRUCTURE NOTES:")
+            for warning in self.issues['structure_warnings']:
+                print(f"   ℹ️  {warning}")
+        
+        if self.dry_run:
+            print(f"\n🧪 DRY RUN MODE - No files were actually moved or copied")
         else:
-            print("(dry run; no files written)")
+            print(f"\n✅ Processing completed successfully!")
+            
+        print("="*50)
+
+    def print_detailed_issues(self) -> None:
+        """Print detailed information about detected issues."""
+        if not (self.issues['duplicate_names'] or self.issues['matching_conflicts']):
+            return
+            
+        print(f"\n" + "="*60)
+        print("🔍 DETAILED ISSUE REPORT")
+        print("="*60)
+        
+        # Duplicate names details
+        if self.issues['duplicate_names']:
+            print(f"\n📋 DUPLICATE FILE NAMES ({len(self.issues['duplicate_names'])} issues):")
+            print("-" * 40)
+            
+            for i, issue in enumerate(self.issues['duplicate_names'][:10], 1):  # Show first 10
+                print(f"{i}. {issue['type'].upper()}: '{issue['base_name']}' ({issue['count']} files)")
+                for file_path in issue['files']:
+                    print(f"   📄 {file_path}")
+                print()
+            
+            if len(self.issues['duplicate_names']) > 10:
+                print(f"   ... and {len(self.issues['duplicate_names']) - 10} more duplicate name issues")
+        
+        # Matching conflicts details  
+        if self.issues['matching_conflicts']:
+            print(f"\n⚡ MATCHING CONFLICTS ({len(self.issues['matching_conflicts'])} conflicts):")
+            print("-" * 40)
+            
+            for i, conflict in enumerate(self.issues['matching_conflicts'][:5], 1):  # Show first 5
+                print(f"{i}. '{conflict['base_name']}':")
+                print(f"   📸 {conflict['still_count']} still image(s)")
+                print(f"   🎥 {conflict['video_count']} video(s)")
+                print(f"   ❗ Cannot determine correct Live Photo pairing")
+                print()
+            
+            if len(self.issues['matching_conflicts']) > 5:
+                print(f"   ... and {len(self.issues['matching_conflicts']) - 5} more conflicts")
+        
+        print("\n💡 RECOMMENDATIONS:")
+        print("   1. Check for duplicate exports in your Google Takeout")
+        print("   2. Consider manually reviewing conflicted files")
+        print("   3. Use --verbose flag for more detailed logging")
+        print("   4. Run with --dry-run first to preview results")
+        print("="*60)

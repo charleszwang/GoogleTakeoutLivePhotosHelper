@@ -40,6 +40,8 @@ Examples:
                        help="Maximum video duration for cross-folder pairing (default: 6.0, 0 disables)")
     parser.add_argument("--dedupe-leftovers", action="store_true",
                        help="Skip duplicate files in leftovers based on content hash")
+    parser.add_argument("--show-issues", action="store_true",
+                       help="Show detailed report of potential issues and conflicts")
     
     args = parser.parse_args()
 
@@ -84,6 +86,10 @@ Examples:
         )
         
         processor.process()
+        
+        # Show detailed issues if requested
+        if args.show_issues and not args.verbose:  # verbose already shows issues
+            processor.print_detailed_issues()
         
     except KeyboardInterrupt:
         print("\nOperation cancelled by user")

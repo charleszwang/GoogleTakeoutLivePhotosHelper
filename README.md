@@ -23,6 +23,30 @@ When you export your Google Photos via Google Takeout, Live Photos are split int
 - `ffprobe` (part of FFmpeg) for video duration analysis (optional)
 - `tkinter` for GUI (usually included with Python)
 
+### Google Takeout Setup
+
+**IMPORTANT**: Before using this tool, you need to properly set up your Google Takeout data:
+
+1. **Download Google Takeout**: Go to [Google Takeout](https://takeout.google.com) and export your Google Photos
+2. **Unzip all files**: Google Takeout gives you multiple ZIP files - unzip ALL of them
+3. **Create Takeout folder**: Create a folder called `Takeout`
+4. **Merge all exports**: Move all the unzipped `Takeout` folders into your main `Takeout` folder
+
+**Expected structure:**
+```
+Takeout/                          # ← Your main folder
+├── Google Photos/
+│   ├── Photos from 2023/
+│   │   ├── IMG_1234.HEIC        # ← Still image
+│   │   ├── IMG_1234.MOV         # ← Live Photo video
+│   │   └── IMG_5678.JPG
+│   └── Photos from 2022/
+│       ├── IMG_9999.HEIC
+│       └── Videos/
+│           └── IMG_9999.MOV     # ← Cross-folder Live Photo
+└── (other Google services data)
+```
+
 ### Installation
 
 ```bash
@@ -66,47 +90,6 @@ python -m google_takeout_live_photos.cli --root ./Takeout --out-pairs ./pairs --
 python google_takeout_live_photos_helper.py --root ./Takeout --out-pairs ./pairs --out-leftovers ./leftovers
 ```
 
-## 📁 Project Structure
-
-This project follows Python best practices with a clean, modular structure:
-
-```
-GoogleTakeoutLivePhotosHelper/
-├── 📦 Source Code
-│   └── src/google_takeout_live_photos/
-│       ├── __init__.py              # Package initialization
-│       ├── __main__.py              # Module entry point
-│       ├── cli.py                   # Command line interface
-│       ├── gui.py                   # Graphical user interface
-│       └── processor.py             # Core processing logic
-│
-├── 🧪 Testing & Quality
-│   ├── tests/                       # Comprehensive test suite
-│   ├── Makefile                     # Development automation
-│   ├── .pre-commit-config.yaml     # Code quality hooks
-│   └── .pylintrc                    # Linting configuration
-│
-├── 🔧 Scripts & Tools
-│   └── scripts/
-│       └── launch_gui.py            # Simple GUI launcher
-│
-├── 📖 Documentation
-│   └── docs/
-│       ├── README.md                # This file
-│       ├── CONTRIBUTING.md          # Developer guidelines
-│       └── CHANGELOG.md             # Version history
-│
-├── ⚙️ Configuration
-│   ├── pyproject.toml               # Modern Python packaging
-│   ├── requirements.txt             # Runtime dependencies
-│   ├── requirements-dev.txt         # Development dependencies
-│   └── .gitignore                   # Git ignore rules
-│
-└── 🔄 Entry Points
-    ├── google_takeout_live_photos_helper.py  # Backward compatibility
-    └── .github/workflows/ci.yml              # CI/CD pipeline
-```
-
 ## 📖 Detailed Usage
 
 ### GUI Features
@@ -137,6 +120,7 @@ Optional Arguments:
   --verbose               Enable verbose logging
   --live-max-seconds N    Maximum video duration for cross-folder pairing (default: 6.0)
   --dedupe-leftovers      Skip duplicate files in leftovers based on content hash
+  --show-issues           Show detailed report of potential issues and conflicts
 ```
 
 ### Multiple Ways to Run
@@ -246,6 +230,23 @@ The codebase is organized into focused modules:
 - Ensure tkinter is installed: `python -c "import tkinter"`
 - On Linux: `sudo apt install python3-tk`
 - Use CLI mode as fallback
+
+**"Directory structure validation failed"**
+- Ensure you've properly merged all Google Takeout ZIP files
+- Look for folders named "Google Photos", "Photos from YYYY", etc.
+- The tool will still work but may be less accurate
+
+**"Duplicate file names found"**
+- This happens when Google Takeout exports contain duplicates
+- Use `--show-issues` to see detailed information
+- Consider manually reviewing conflicted files
+- The tool will still process files but pairing may be affected
+
+**"Potential matching conflicts detected"**
+- Multiple files with same base name found
+- Use `--verbose --dry-run` to see which files conflict
+- Some Live Photos may not pair correctly
+- Consider using `--show-issues` for detailed analysis
 
 ## 🤝 Contributing
 

@@ -40,6 +40,7 @@ class GoogleTakeoutGUI:
         self.verbose = tk.BooleanVar(value=False)
         self.max_duration = tk.DoubleVar(value=6.0)
         self.dedupe_leftovers = tk.BooleanVar(value=False)
+        self.show_issues = tk.BooleanVar(value=False)
 
         # Processing state
         self.processing = False
@@ -172,9 +173,16 @@ class GoogleTakeoutGUI:
             variable=self.dedupe_leftovers,
         ).grid(row=3, column=0, columnspan=2, sticky=tk.W, pady=2)
 
+        # Show issues option
+        ttk.Checkbutton(
+            options_frame,
+            text="Show detailed issue report after processing",
+            variable=self.show_issues,
+        ).grid(row=4, column=0, columnspan=2, sticky=tk.W, pady=2)
+
         # Max duration setting
         duration_frame = ttk.Frame(options_frame)
-        duration_frame.grid(row=4, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=5)
+        duration_frame.grid(row=5, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=5)
 
         ttk.Label(duration_frame, text="Max video duration for Live Photos (seconds):").pack(
             side=tk.LEFT
@@ -193,7 +201,7 @@ class GoogleTakeoutGUI:
             options_frame,
             text="💡 Tip: Use dry run first to preview what will happen!",
             foreground="blue",
-        ).grid(row=5, column=0, columnspan=2, sticky=tk.W, pady=(10, 0))
+        ).grid(row=6, column=0, columnspan=2, sticky=tk.W, pady=(10, 0))
 
         return start_row + 1
 
@@ -370,6 +378,12 @@ class GoogleTakeoutGUI:
                 self.log_message("Processing completed successfully!", "SUCCESS")
                 self.update_status("Processing completed")
                 self.show_results()
+                
+                # Show detailed issues if requested
+                if self.show_issues.get() and not self.verbose.get():
+                    if (self.processor.stats['duplicate_names'] > 0 or 
+                        self.processor.stats['potential_issues'] > 0):
+                        self.show_issues_dialog()
 
         except Exception as e:
             self.log_message(f"Error during processing: {str(e)}", "ERROR")
@@ -428,6 +442,14 @@ Processing Complete! 📸
         if self.dedupe_leftovers.get() and stats['leftovers_skipped'] > 0:
             result_message += f"• Duplicates skipped: {stats['leftovers_skipped']:,}\n"
 
+        # Add warnings if present
+        if stats.get('duplicate_names', 0) > 0 or stats.get('potential_issues', 0) > 0:
+            result_message += f"\n⚠️ Warnings:\n"
+            if stats.get('duplicate_names', 0) > 0:
+                result_message += f"• {stats['duplicate_names']} sets of duplicate file names\n"
+            if stats.get('potential_issues', 0) > 0:
+                result_message += f"• {stats['potential_issues']} potential matching conflicts\n"
+
         result_message += f"""
 📁 Output locations:
 • Live Photos pairs: {self.pairs_dir.get()}
@@ -438,6 +460,86 @@ Processing Complete! 📸
             result_message += "\n⚠️ This was a dry run - no files were actually moved or copied."
 
         messagebox.showinfo("Processing Complete", result_message)
+
+    def show_issues_dialog(self) -> None:
+        """Show detailed issues in a separate dialog."""
+        if not self.processor:
+            return
+            
+        # Create issues dialog
+        dialog = tk.Toplevel(self.root)
+        dialog.title("⚠️ Issues and Conflicts Report")
+        dialog.geometry("700x500")
+        dialog.resizable(True, True)
+        
+        # Create scrolled text for issues
+        issues_text = scrolledtext.ScrolledText(
+            dialog, wrap=tk.WORD, font=("Consolas", 10), padx=10, pady=10
+        )
+        issues_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Generate issues report
+        issues_report = self.generate_issues_report()
+        issues_text.insert(tk.END, issues_report)
+        issues_text.config(state=tk.DISABLED)
+        
+        # Add close button
+        close_button = ttk.Button(dialog, text="Close", command=dialog.destroy)
+        close_button.pack(pady=10)
+        
+        # Center the dialog
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+    def generate_issues_report(self) -> str:
+        """Generate a detailed issues report for display."""
+        if not self.processor:
+            return "No processor available"
+            
+        report = []
+        report.append("🔍 DETAILED ISSUES REPORT")
+        report.append("=" * 60)
+        
+        # Structure warnings
+        if self.processor.issues['structure_warnings']:
+            report.append("\n📋 STRUCTURE WARNINGS:")
+            for warning in self.processor.issues['structure_warnings']:
+                report.append(f"   ⚠️  {warning}")
+        
+        # Duplicate names
+        if self.processor.issues['duplicate_names']:
+            report.append(f"\n📋 DUPLICATE FILE NAMES ({len(self.processor.issues['duplicate_names'])} issues):")
+            for i, issue in enumerate(self.processor.issues['duplicate_names'][:10], 1):
+                report.append(f"\n{i}. {issue['type'].upper()}: '{issue['base_name']}' ({issue['count']} files)")
+                for file_path in issue['files']:
+                    report.append(f"   📄 {file_path}")
+            
+            if len(self.processor.issues['duplicate_names']) > 10:
+                remaining = len(self.processor.issues['duplicate_names']) - 10
+                report.append(f"\n   ... and {remaining} more duplicate name issues")
+        
+        # Matching conflicts
+        if self.processor.issues['matching_conflicts']:
+            report.append(f"\n⚡ MATCHING CONFLICTS ({len(self.processor.issues['matching_conflicts'])} conflicts):")
+            for i, conflict in enumerate(self.processor.issues['matching_conflicts'][:5], 1):
+                report.append(f"\n{i}. '{conflict['base_name']}':")
+                report.append(f"   📸 {conflict['still_count']} still image(s)")
+                report.append(f"   🎥 {conflict['video_count']} video(s)")
+                report.append(f"   ❗ Cannot determine correct Live Photo pairing")
+            
+            if len(self.processor.issues['matching_conflicts']) > 5:
+                remaining = len(self.processor.issues['matching_conflicts']) - 5
+                report.append(f"\n   ... and {remaining} more conflicts")
+        
+        # Recommendations
+        report.append("\n💡 RECOMMENDATIONS:")
+        report.append("   1. Check for duplicate exports in your Google Takeout")
+        report.append("   2. Consider manually reviewing conflicted files")
+        report.append("   3. Use verbose mode for more detailed logging")
+        report.append("   4. Ensure proper Google Takeout folder structure")
+        report.append("=" * 60)
+        
+        return "\n".join(report)
 
 
 def main():
