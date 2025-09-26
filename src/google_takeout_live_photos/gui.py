@@ -58,8 +58,15 @@ class GoogleTakeoutGUI:
         """Initialize the GUI application."""
         self.root = root
         self.root.title("Google Takeout Live Photos Helper")
-        self.root.geometry("1100x1000")  # Much larger to show all content
-        self.root.minsize(1000, 950)  # Larger minimum size
+        # Size dynamically to fit screen so content isn't cut off
+        self.root.update_idletasks()
+        screen_w = self.root.winfo_screenwidth()
+        screen_h = self.root.winfo_screenheight()
+        desired_w = min(1100, max(900, screen_w - 120))
+        desired_h = min(1000, max(700, screen_h - 140))
+        self.root.geometry(f"{desired_w}x{desired_h}")
+        self.root.minsize(min(desired_w, max(800, screen_w - 200)),
+                          min(desired_h, max(650, screen_h - 220)))
         self.root.resizable(True, True)
 
         # Theme management
@@ -103,9 +110,11 @@ class GoogleTakeoutGUI:
                        foreground=self.current_theme['text_primary'])
         
         # Entry widgets
-        style.configure('TEntry', fieldbackground=self.current_theme['bg_secondary'],
-                       bordercolor=self.current_theme['bg_accent'], 
-                       lightcolor=self.current_theme['bg_accent'])
+        style.configure('TEntry',
+                        fieldbackground=self.current_theme['bg_secondary'],
+                        bordercolor=self.current_theme['bg_accent'],
+                        lightcolor=self.current_theme['bg_accent'],
+                        foreground=self.current_theme['text_primary'])
         
         # Buttons with attractive styling
         style.configure('TButton', background=self.current_theme['bg_accent'],
@@ -122,8 +131,10 @@ class GoogleTakeoutGUI:
                        troughcolor=self.current_theme['bg_secondary'])
         
         # Spinbox
-        style.configure('TSpinbox', fieldbackground=self.current_theme['bg_secondary'],
-                       bordercolor=self.current_theme['bg_accent'])
+        style.configure('TSpinbox',
+                        fieldbackground=self.current_theme['bg_secondary'],
+                        bordercolor=self.current_theme['bg_accent'],
+                        foreground=self.current_theme['text_primary'])
 
     def toggle_dark_mode(self) -> None:
         """Toggle between light and dark mode."""
@@ -140,13 +151,62 @@ class GoogleTakeoutGUI:
 
     def setup_ui(self) -> None:
         """Set up the beautiful user interface with light blue theme."""
-        # Create main container with padding and theme
-        main_frame = ttk.Frame(self.root, padding="15")
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        # Create scrollable container so small screens can access all content
+        container = ttk.Frame(self.root)
+        container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
-        # Configure grid weights for responsive design
+        # Root expands
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
+
+        # Canvas + vertical scrollbar
+        self.canvas = tk.Canvas(
+            container,
+            background=self.current_theme['bg_primary'],
+            highlightthickness=0,
+            bd=0
+        )
+        vscroll = ttk.Scrollbar(container, orient="vertical", command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=vscroll.set)
+        self.canvas.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
+        vscroll.grid(row=0, column=1, sticky=(tk.N, tk.S))
+
+        container.columnconfigure(0, weight=1)
+        container.rowconfigure(0, weight=1)
+
+        # Frame inside canvas
+        main_frame = ttk.Frame(self.canvas, padding="10")
+        self._canvas_window = self.canvas.create_window((0, 0), window=main_frame, anchor='nw')
+
+        # Update scrollregion and width bindings
+        def _on_frame_configure(event):
+            self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        main_frame.bind("<Configure>", _on_frame_configure)
+
+        def _on_canvas_configure(event):
+            try:
+                self.canvas.itemconfigure(self._canvas_window, width=event.width)
+            except Exception:
+                pass
+        self.canvas.bind("<Configure>", _on_canvas_configure)
+
+        # Mouse wheel support
+        def _on_mousewheel(event):
+            delta = 0
+            if event.delta:
+                delta = -1 * int(event.delta / 120)
+            elif event.num == 4:
+                delta = -1
+            elif event.num == 5:
+                delta = 1
+            if delta:
+                self.canvas.yview_scroll(delta, "units")
+
+        self.canvas.bind_all("<MouseWheel>", _on_mousewheel)      # Windows/macOS
+        self.canvas.bind_all("<Button-4>", _on_mousewheel)        # Linux up
+        self.canvas.bind_all("<Button-5>", _on_mousewheel)        # Linux down
+
+        # Allow content to stretch horizontally
         main_frame.columnconfigure(1, weight=1)
         
         # Configure specific rows for proper expansion
@@ -167,7 +227,7 @@ class GoogleTakeoutGUI:
             text=f"Google Takeout Live Photos Helper v{__version__}",
             font=("Arial", 18, "bold"),
         )
-        title_label.grid(row=current_row, column=0, columnspan=2, pady=(0, 15), sticky=tk.W)
+        title_label.grid(row=current_row, column=0, columnspan=2, pady=(0, 8), sticky=tk.W)
         current_row += 1
 
         # Descriptive subtitle
@@ -181,38 +241,11 @@ class GoogleTakeoutGUI:
             justify=tk.CENTER,
             font=("Arial", 11)
         )
-        desc_label.grid(row=current_row, column=0, columnspan=3, pady=(0, 10))
+        desc_label.grid(row=current_row, column=0, columnspan=3, pady=(0, 6))
         current_row += 1
+        # Tip and privacy moved to hover tooltips in top-right
 
-        # Migration tip
-        tip_text = (
-            "💡 Still have Google Photos access? Just use the Google Photos app:\n"
-            "Select photos → Share → Save to Device (this tool is for those who lost access)"
-        )
-        tip_label = ttk.Label(
-            main_frame,
-            text=tip_text,
-            justify=tk.CENTER,
-            font=("Arial", 9)
-        )
-        tip_label.grid(row=current_row, column=0, columnspan=3, pady=(0, 10))
-        current_row += 1
-
-        # Privacy notice
-        privacy_text = (
-            "🔒 Privacy: All processing happens locally on your computer.\n"
-            "No photos are sent to any server - everything stays private on your device."
-        )
-        privacy_label = ttk.Label(
-            main_frame,
-            text=privacy_text,
-            justify=tk.CENTER,
-            font=("Arial", 9)
-        )
-        privacy_label.grid(row=current_row, column=0, columnspan=3, pady=(0, 15))
-        current_row += 1
-
-        # Prominent donation section with enhanced styling
+        # Prominent donation section with enhanced styling (collapsible)
         self.setup_donation_section(main_frame, current_row)
         current_row += 1
 
@@ -226,10 +259,10 @@ class GoogleTakeoutGUI:
         # Action buttons
         current_row = self.setup_action_buttons(main_frame, current_row)
 
-        # Progress section
+        # Progress section – move above results to keep height tighter
         current_row = self.setup_progress_section(main_frame, current_row)
 
-        # Results/log section
+        # Results/log section (reduced height by default)
         self.setup_results_section(main_frame, current_row)
 
     def setup_theme_toggle(self, parent: ttk.Frame, start_row: int) -> None:
@@ -244,7 +277,26 @@ class GoogleTakeoutGUI:
             command=self.toggle_dark_mode,
             style="TButton"
         )
-        self.theme_button.pack()
+        self.theme_button.pack(side=tk.TOP, anchor=tk.E)
+
+        # Compact info with hover tooltips to save vertical space
+        info_frame = tk.Frame(toggle_frame, bg=self.current_theme['bg_primary'])
+        info_frame.pack(side=tk.TOP, anchor=tk.E, pady=(6, 0))
+
+        tip_label = ttk.Label(info_frame, text="ℹ️ Tip", cursor="question_arrow")
+        tip_label.pack(side=tk.LEFT, padx=4)
+        self.attach_tooltip(tip_label, (
+            "Still have Google Photos access? On your phone:\n"
+            "Select photos → Share → Save to Device.\n"
+            "This tool is mainly for when you no longer have access."
+        ))
+
+        privacy_label = ttk.Label(info_frame, text="🔒 Privacy", cursor="question_arrow")
+        privacy_label.pack(side=tk.LEFT)
+        self.attach_tooltip(privacy_label, (
+            "All processing happens locally on your computer.\n"
+            "No uploads, completely offline. Open source."
+        ))
 
     def refresh_theme(self) -> None:
         """Refresh all widget colors after theme change."""
@@ -316,12 +368,61 @@ class GoogleTakeoutGUI:
         self.theme_button.configure(
             text="☀️ Light Mode" if self.is_dark_mode else "🌙 Dark Mode"
         )
+        # Force ttk entry/spinbox redraw to pick up new foreground colors
+        try:
+            if hasattr(self, 'takeout_entry'):
+                self.takeout_entry.configure()
+            if hasattr(self, 'output_entry'):
+                self.output_entry.configure()
+        except Exception:
+            pass
+
+    def attach_tooltip(self, widget: tk.Widget, text: str) -> None:
+        """Attach a simple tooltip to a widget."""
+        tooltip = None
+
+        def show_tooltip(event=None):
+            nonlocal tooltip
+            if tooltip is not None:
+                return
+            x = widget.winfo_rootx() + 10
+            y = widget.winfo_rooty() + widget.winfo_height() + 6
+            tooltip = tk.Toplevel(widget)
+            tooltip.wm_overrideredirect(True)
+            tooltip.configure(bg=self.current_theme['bg_secondary'])
+            label = tk.Label(
+                tooltip,
+                text=text,
+                justify=tk.LEFT,
+                bg=self.current_theme['bg_secondary'],
+                fg=self.current_theme['text_primary'],
+                relief=tk.SOLID,
+                borderwidth=1,
+                font=("Arial", 9),
+                padx=8,
+                pady=6,
+                wraplength=320,
+            )
+            label.pack()
+            tooltip.wm_geometry(f"+{x}+{y}")
+
+        def hide_tooltip(event=None):
+            nonlocal tooltip
+            if tooltip is not None:
+                try:
+                    tooltip.destroy()
+                except Exception:
+                    pass
+                tooltip = None
+
+        widget.bind("<Enter>", show_tooltip)
+        widget.bind("<Leave>", hide_tooltip)
 
     def setup_donation_section(self, parent: ttk.Frame, start_row: int) -> None:
         """Set up the prominent donation section."""
         # Create donation frame with light blue background
         donate_frame = tk.Frame(parent, bg=self.current_theme['bg_secondary'], relief=tk.RAISED, bd=2)
-        donate_frame.grid(row=start_row, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 20), padx=5)
+        donate_frame.grid(row=start_row, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10), padx=5)
         
         # Add title label
         title_label = tk.Label(
@@ -331,7 +432,7 @@ class GoogleTakeoutGUI:
             fg=self.current_theme['text_primary'],
             font=("Arial", 12, "bold")
         )
-        title_label.pack(pady=(10, 5))
+        title_label.pack(pady=(6, 4))
         
         # Donation message
         donate_text = tk.Label(
@@ -342,7 +443,7 @@ class GoogleTakeoutGUI:
             font=("Arial", 10),
             wraplength=400
         )
-        donate_text.pack(pady=(0, 8))
+        donate_text.pack(pady=(0, 6))
         
         # Donation button with accent styling
         donate_button = ttk.Button(
@@ -351,13 +452,13 @@ class GoogleTakeoutGUI:
             command=self.show_support_info,
             style="Accent.TButton"
         )
-        donate_button.pack(pady=(0, 10))
+        donate_button.pack(pady=(0, 8))
 
     def setup_directory_section(self, parent: ttk.Frame, start_row: int) -> None:
         """Set up the enhanced directory selection section."""
         # Create directory frame with light blue background
         dir_frame = tk.Frame(parent, bg=self.current_theme['bg_secondary'], relief=tk.RAISED, bd=2)
-        dir_frame.grid(row=start_row, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 15), padx=5)
+        dir_frame.grid(row=start_row, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10), padx=5)
         
         # Add title label
         title_label = tk.Label(
@@ -367,7 +468,7 @@ class GoogleTakeoutGUI:
             fg=self.current_theme['text_primary'],
             font=("Arial", 12, "bold")
         )
-        title_label.grid(row=0, column=0, columnspan=3, pady=(10, 15))
+        title_label.grid(row=0, column=0, columnspan=3, pady=(6, 10))
         
         # Configure grid
         dir_frame.columnconfigure(1, weight=1)
@@ -412,7 +513,7 @@ class GoogleTakeoutGUI:
 
         # Enhanced info about automatic subdirectories
         info_frame = tk.Frame(dir_frame, bg=self.current_theme['bg_accent'], relief=tk.RAISED, bd=1)
-        info_frame.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(10, 10), padx=10)
+        info_frame.grid(row=5, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(8, 8), padx=10)
         
         info_label = tk.Label(
             info_frame,
@@ -429,7 +530,7 @@ class GoogleTakeoutGUI:
         """Set up the enhanced options section."""
         # Options frame with light blue background
         options_frame = tk.Frame(parent, bg=self.current_theme['bg_secondary'], relief=tk.RAISED, bd=2)
-        options_frame.grid(row=start_row, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 15), padx=5)
+        options_frame.grid(row=start_row, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10), padx=5)
         
         # Add title label
         title_label = tk.Label(
@@ -439,14 +540,14 @@ class GoogleTakeoutGUI:
             fg=self.current_theme['text_primary'],
             font=("Arial", 12, "bold")
         )
-        title_label.grid(row=0, column=0, columnspan=2, pady=(10, 15), padx=15)
+        title_label.grid(row=0, column=0, columnspan=2, pady=(6, 10), padx=15)
         
         # Configure grid
         options_frame.columnconfigure(1, weight=1)
 
         # Copy files option with warning
         copy_frame = tk.Frame(options_frame, bg=self.current_theme['bg_secondary'])
-        copy_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=8, padx=15)
+        copy_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=4, padx=15)
         
         # Create custom checkbutton with light blue background
         copy_check = tk.Checkbutton(
@@ -480,7 +581,7 @@ class GoogleTakeoutGUI:
             selectcolor=self.current_theme['bg_accent'],
             font=("Arial", 10)
         )
-        dry_run_check.grid(row=2, column=0, columnspan=2, sticky=tk.W, pady=8, padx=15)
+        dry_run_check.grid(row=2, column=0, columnspan=2, sticky=tk.W, pady=4, padx=15)
 
         # Verbose option
         verbose_check = tk.Checkbutton(
@@ -492,11 +593,11 @@ class GoogleTakeoutGUI:
             selectcolor=self.current_theme['bg_accent'],
             font=("Arial", 10)
         )
-        verbose_check.grid(row=3, column=0, columnspan=2, sticky=tk.W, pady=8, padx=15)
+        verbose_check.grid(row=3, column=0, columnspan=2, sticky=tk.W, pady=4, padx=15)
 
         # Deduplication option with explanation
         dedupe_frame = tk.Frame(options_frame, bg=self.current_theme['bg_secondary'])
-        dedupe_frame.grid(row=4, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=8, padx=15)
+        dedupe_frame.grid(row=4, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=4, padx=15)
         
         dedupe_check = tk.Checkbutton(
             dedupe_frame,
@@ -529,7 +630,7 @@ class GoogleTakeoutGUI:
             selectcolor=self.current_theme['bg_accent'],
             font=("Arial", 10)
         )
-        issues_check.grid(row=5, column=0, columnspan=2, sticky=tk.W, pady=8, padx=15)
+        issues_check.grid(row=5, column=0, columnspan=2, sticky=tk.W, pady=4, padx=15)
 
         # Prepare for Apple Photos import
         prepare_check = tk.Checkbutton(
@@ -541,11 +642,11 @@ class GoogleTakeoutGUI:
             selectcolor=self.current_theme['bg_accent'],
             font=("Arial", 10)
         )
-        prepare_check.grid(row=6, column=0, columnspan=2, sticky=tk.W, pady=8, padx=15)
+        prepare_check.grid(row=6, column=0, columnspan=2, sticky=tk.W, pady=4, padx=15)
 
         # Max duration setting
         duration_frame = tk.Frame(options_frame, bg=self.current_theme['bg_secondary'])
-        duration_frame.grid(row=7, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=8, padx=15)
+        duration_frame.grid(row=7, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=4, padx=15)
 
         tk.Label(
             duration_frame, 
@@ -567,7 +668,7 @@ class GoogleTakeoutGUI:
 
         # Enhanced tip section
         tip_frame = tk.Frame(options_frame, bg=self.current_theme['bg_accent'], relief=tk.RAISED, bd=1)
-        tip_frame.grid(row=8, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(15, 10), padx=15)
+        tip_frame.grid(row=8, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(10, 8), padx=15)
         
         tk.Label(
             tip_frame,
@@ -668,7 +769,7 @@ class GoogleTakeoutGUI:
         # Enhanced log text area with theme colors
         self.log_text = scrolledtext.ScrolledText(
             results_frame, 
-            height=12, 
+            height=8, 
             wrap=tk.WORD, 
             font=("Consolas", 10),
             bg=self.current_theme['bg_primary'],
