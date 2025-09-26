@@ -1,0 +1,17 @@
+# Development dependencies
+pytest>=7.0
+pytest-cov>=4.0
+black>=23.0
+flake8>=6.0
+mypy>=1.0
+pre-commit>=3.0
+
+# Additional code quality tools (Python's rubocop equivalent)
+pylint>=3.0
+bandit>=1.7
+isort>=5.12
+autopep8>=2.0
+pycodestyle>=2.11
+pydocstyle>=6.3
+vulture>=2.10
+safety>=2.3

@@ -1,0 +1,89 @@
+[MASTER]
+# Python code to execute, usually for sys.path manipulation such as
+# pygtk.require().
+init-hook='import sys; sys.path.append(".")'
+
+# Use multiple processes to speed up Pylint.
+jobs=0
+
+# Control the amount of potential inferred values when inferring a single
+# object. This can help the performance when dealing with large functions or
+# complex, nested conditions.
+limit-inference-results=100
+
+[MESSAGES CONTROL]
+# Disable specific warnings and errors
+disable=
+    # Too restrictive for this project
+    too-few-public-methods,
+    too-many-arguments,
+    too-many-locals,
+    too-many-branches,
+    too-many-statements,
+    # Style preferences
+    missing-module-docstring,
+    line-too-long,
+    # Handled by other tools
+    trailing-whitespace,
+    missing-final-newline,
+    # Not needed for this project
+    global-statement,
+    # Allow constants in uppercase
+    invalid-name
+
+[REPORTS]
+# Set the output format
+output-format=colorized
+
+# Tells whether to display a full report or only the messages
+reports=no
+
+[REFACTORING]
+# Maximum number of nested blocks for function / method body
+max-nested-blocks=5
+
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=100
+
+# String used as indentation unit.
+indent-string='    '
+
+[VARIABLES]
+# Tells whether we should check for unused import in __init__ files.
+init-import=no
+
+[CLASSES]
+# List of method names used to declare (i.e. assign) instance attributes.
+defining-attr-methods=__init__,__new__,setUp
+
+[DESIGN]
+# Maximum number of arguments for function / method
+max-args=8
+
+# Maximum number of attributes for a class
+max-attributes=15
+
+# Maximum number of boolean expressions in a if statement
+max-bool-expr=5
+
+# Maximum number of branch for function / method body
+max-branches=15
+
+# Maximum number of locals for function / method body
+max-locals=20
+
+# Maximum number of parents for a class
+max-parents=7
+
+# Maximum number of public methods for a class
+max-public-methods=25
+
+# Maximum number of return / yield for function / method body
+max-returns=8
+
+# Maximum number of statements in function / method body
+max-statements=60
+
+# Minimum number of public methods for a class
+min-public-methods=1

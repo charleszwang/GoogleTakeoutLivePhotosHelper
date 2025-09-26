@@ -1,0 +1,5 @@
+# Runtime dependencies
+# This tool uses only Python standard library modules
+
+# Development dependencies (optional)
+# Install with: pip install -r requirements-dev.txt

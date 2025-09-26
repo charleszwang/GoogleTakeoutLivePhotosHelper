@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""
+Command line interface for Google Takeout Live Photos Helper.
+"""
+
+import os
+import sys
+import argparse
+from .processor import GoogleTakeoutProcessor
+
+
+def main():
+    """Main entry point for CLI."""
+    parser = argparse.ArgumentParser(
+        description="Google Takeout Live Photos Helper - Organize Live Photos pairs and standalone media files",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s --gui                                                           # Launch GUI
+  %(prog)s --root ./Takeout --out-pairs ./pairs --out-leftovers ./leftovers
+  %(prog)s --root ./Takeout --out-pairs ./pairs --out-leftovers ./leftovers --copy --verbose
+  %(prog)s --root ./Takeout --out-pairs ./pairs --out-leftovers ./leftovers --dry-run
+        """)
+    
+    parser.add_argument("--gui", action="store_true",
+                       help="Launch the graphical user interface")
+    parser.add_argument("--root",
+                       help="Root directory with unzipped Google Takeout data")
+    parser.add_argument("--out-pairs",
+                       help="Output directory for matched Live Photos pairs")
+    parser.add_argument("--out-leftovers",
+                       help="Output directory for unmatched media files")
+    parser.add_argument("--copy", action="store_true",
+                       help="Copy files instead of creating symlinks")
+    parser.add_argument("--dry-run", action="store_true",
+                       help="Show what would be done without making changes")
+    parser.add_argument("--verbose", action="store_true",
+                       help="Enable verbose logging")
+    parser.add_argument("--live-max-seconds", type=float, default=6.0,
+                       help="Maximum video duration for cross-folder pairing (default: 6.0, 0 disables)")
+    parser.add_argument("--dedupe-leftovers", action="store_true",
+                       help="Skip duplicate files in leftovers based on content hash")
+    
+    args = parser.parse_args()
+
+    # Launch GUI if requested
+    if args.gui:
+        try:
+            from .gui import main as gui_main
+            gui_main()
+        except ImportError as e:
+            print(f"Error: Could not launch GUI: {e}", file=sys.stderr)
+            print("Make sure tkinter is installed (usually comes with Python)", file=sys.stderr)
+            sys.exit(1)
+        except Exception as e:
+            print(f"Error launching GUI: {e}", file=sys.stderr)
+            sys.exit(1)
+        return
+
+    # CLI mode - require arguments
+    if not args.root:
+        parser.error("--root is required when not using --gui")
+    if not args.out_pairs:
+        parser.error("--out-pairs is required when not using --gui")
+    if not args.out_leftovers:
+        parser.error("--out-leftovers is required when not using --gui")
+
+    # Validate input directory
+    if not os.path.isdir(args.root):
+        print(f"Error: Directory does not exist: {args.root}", file=sys.stderr)
+        sys.exit(1)
+
+    # Create processor and run
+    try:
+        processor = GoogleTakeoutProcessor(
+            root_dir=args.root,
+            pairs_dir=args.out_pairs,
+            leftovers_dir=args.out_leftovers,
+            copy_files=args.copy,
+            dry_run=args.dry_run,
+            verbose=args.verbose,
+            max_video_duration=args.live_max_seconds,
+            dedupe_leftovers=args.dedupe_leftovers
+        )
+        
+        processor.process()
+        
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
