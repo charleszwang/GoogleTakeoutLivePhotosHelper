@@ -1,6 +1,7 @@
 name: Build Executables
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
@@ -8,81 +9,68 @@ permissions:
   contents: write
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  build-and-release:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+            ext: .exe
+            separator: ";"
+          - os: macos-latest  
+            name: macos
+            ext: .app
+            separator: ":"
+          - os: ubuntu-latest
+            name: linux
+            ext: ""
+            separator: ":"
+    
+    runs-on: ${{ matrix.os }}
+    
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
     
-    - name: Set up Python
+    - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache: 'pip'
     
-    - name: Install PyInstaller
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller==6.0.0
+        pip install pyinstaller==6.10.0
     
-    - name: Build Windows executable
+    - name: Build executable
       run: |
-        pyinstaller --onefile --windowed --name "GoogleTakeoutHelper" --add-data "src/google_takeout_live_photos;google_takeout_live_photos" src/google_takeout_live_photos/gui_app.py
+        pyinstaller --onefile --windowed --name "GoogleTakeoutHelper" --add-data "src/google_takeout_live_photos${{ matrix.separator }}google_takeout_live_photos" src/google_takeout_live_photos/gui_app.py
     
-    - name: Upload Windows executable
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Prepare release file (Windows)
+      if: matrix.name == 'windows'
       run: |
-        gh release upload ${{ github.event.release.tag_name }} dist/GoogleTakeoutHelper.exe
-
-  build-macos:
-    runs-on: macos-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+        mv dist/GoogleTakeoutHelper.exe GoogleTakeoutHelper.exe
     
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Install PyInstaller
+    - name: Prepare release file (macOS)
+      if: matrix.name == 'macos'
       run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller==6.0.0
-    
-    - name: Build macOS executable
-      run: |
-        pyinstaller --onefile --windowed --name "GoogleTakeoutHelper" --add-data "src/google_takeout_live_photos:google_takeout_live_photos" src/google_takeout_live_photos/gui_app.py
         zip -r GoogleTakeoutHelper-macOS.zip dist/GoogleTakeoutHelper.app
     
-    - name: Upload macOS executable
+    - name: Prepare release file (Linux)
+      if: matrix.name == 'linux'
+      run: |
+        mv dist/GoogleTakeoutHelper GoogleTakeoutHelper-linux
+    
+    - name: Upload release assets
+      if: github.event_name == 'release'
+      run: |
+        if [ "${{ matrix.name }}" = "windows" ]; then
+          gh release upload ${{ github.event.release.tag_name }} GoogleTakeoutHelper.exe
+        elif [ "${{ matrix.name }}" = "macos" ]; then
+          gh release upload ${{ github.event.release.tag_name }} GoogleTakeoutHelper-macOS.zip
+        elif [ "${{ matrix.name }}" = "linux" ]; then
+          gh release upload ${{ github.event.release.tag_name }} GoogleTakeoutHelper-linux
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh release upload ${{ github.event.release.tag_name }} GoogleTakeoutHelper-macOS.zip
-
-  build-linux:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Install PyInstaller
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller==6.0.0
-    
-    - name: Build Linux executable
-      run: |
-        pyinstaller --onefile --windowed --name "GoogleTakeoutHelper" --add-data "src/google_takeout_live_photos:google_takeout_live_photos" src/google_takeout_live_photos/gui_app.py
-    
-    - name: Upload Linux executable
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh release upload ${{ github.event.release.tag_name }} dist/GoogleTakeoutHelper
