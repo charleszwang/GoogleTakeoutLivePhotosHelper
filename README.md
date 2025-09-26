@@ -176,6 +176,35 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 🔗 Related Tools & Projects
+
+**Complementary tools that work well with this project:**
+
+### **Photo Organization & Management**
+- **[rclone](https://rclone.org/)** - Sync organized photos to cloud storage
+- **[PhotoPrism](https://photoprism.app/)** - Self-hosted photo management after organization
+- **[digiKam](https://www.digikam.org/)** - Professional photo management (open source)
+- **[XnView MP](https://www.xnview.com/en/xnviewmp/)** - Photo viewer and organizer
+
+### **File Format & Conversion**
+- **[HEIC Converter](https://imazing.com/heic)** - Convert HEIC files to JPG if needed  
+- **[ExifTool](https://exiftool.org/)** - Advanced metadata editing and analysis
+- **[ImageMagick](https://imagemagick.org/)** - Image processing and conversion
+
+### **Google Takeout Related**
+- **[GooglePhotosTakeoutHelper](https://github.com/TheLastGimbus/GooglePhotosTakeoutHelper)** - Another approach to Google Takeout organization
+- **[google-photos-exif](https://github.com/mattwilson1024/google-photos-exif)** - Fix EXIF data in Google Photos exports
+
+### **Live Photos Tools**
+- **[Live Photo Converter](https://apps.apple.com/app/live-photo-converter/id1391093678)** - Convert Live Photos to other formats
+- **[HEIF Utility](https://liuziangexit.com/HEIF-Utility/)** - HEIC/HEIF file handling
+
+**Why this tool is unique:**
+- **🎯 Only tool** specifically designed for Google Takeout Live Photos pairing
+- **🖥️ User-friendly GUI** unlike command-line alternatives
+- **🆓 Free and open source** unlike expensive photo management software
+- **🔄 Handles the exact problem** of split Live Photos in Takeout exports
+
 ## 🙏 Acknowledgments
 
 - Inspired by the absolute pain the ass live photos from Google Takeout is
