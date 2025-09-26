@@ -34,6 +34,13 @@ If this tool helps you organize your Google Photos, please consider supporting i
 [![Linux GUI](https://img.shields.io/github/downloads/charleszwang/GoogleTakeoutLivePhotosHelper/latest/google-takeout-helper-gui-Linux.svg?style=flat-square&label=Linux%20GUI&cacheSeconds=3600)](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest)
 
 
+### ⬇️ Direct Downloads
+
+- Windows: [Download EXE](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest/download/google-takeout-helper-gui-Windows.exe)
+- macOS: [Download app](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest/download/google-takeout-helper-gui-macOS)
+- Linux: [Download binary](https://github.com/charleszwang/GoogleTakeoutLivePhotosHelper/releases/latest/download/google-takeout-helper-gui-Linux)
+
+
 
 ## 🔒 **Privacy & Security**
 
