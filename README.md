@@ -33,16 +33,10 @@ If this tool helps you organize your Google Photos, please consider supporting i
 
 ## 🔒 **Privacy & Security**
 
-**Your photos stay 100% private and secure:**
-
+**Your photos stay 100% private:**
 - **🏠 All processing happens locally** on your computer
-- **🚫 No data sent to servers** - nothing leaves your machine
-- **🔒 No internet connection required** for processing
-- **👀 No tracking or analytics** - completely private
-- **💾 Your files stay on your device** - only organized locally
-- **🔐 Open source code** - you can verify exactly what it does
-
-**This tool is designed for maximum privacy and security of your personal photos.**
+- **🚫 Nothing sent to any servers** - completely offline
+- **🔐 Open source** - you can see exactly what it does
 
 ## 🎯 What it does
 
@@ -173,17 +167,9 @@ ls ~/Desktop/OrganizedPhotos/OtherMedia/     # Other photos/videos
 - Download the standalone executable instead (no Python needed)
 - Or install tkinter: `brew install python-tk` (macOS)
 
-## 🔧 For Developers
-
-Want to contribute or modify the code? See the [Developer Guide](DEVELOPER_GUIDE.md) for:
-- Development setup and testing
-- Code quality tools and standards  
-- Architecture overview and design patterns
-- Building and distribution instructions
-
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📝 License
 
